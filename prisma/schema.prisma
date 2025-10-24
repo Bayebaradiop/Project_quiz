@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StatutUtilisateur {
+  actif
+  inactif
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum StatutQuiz {
+  brouillon
+  publie
+}
+
+enum TypeQuiz {
+  instantane
+  programme
+}
+
+model Utilisateur {
+  id        Int       @id @default(autoincrement())
+  prenom    String
+  nom       String
+  email     String    @unique
+  password  String
+  statut    StatutUtilisateur @default(actif)
+  role      Role      @default(user)
+  quizzes   Quiz[]    @relation("CreateurQuizzes")
+  reponses  Reponse[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model Quiz {
+  id           Int          @id @default(autoincrement())
+  titre        String
+  description  String?
+  type_quiz    TypeQuiz
+  lien_partage String        @unique
+  statut       StatutQuiz    @default(brouillon)
+  createur_id  Int
+  createur     Utilisateur   @relation("CreateurQuizzes", fields: [createur_id], references: [id])
+  questions    Question[]
+  invitations  Invitation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+}
+
+model Question {
+  id             Int        @id @default(autoincrement())
+  texte          String
+  options        Json
+  bonne_reponse  String
+  duree          Int
+  ordre          Int
+  quiz_id        Int
+  quiz           Quiz       @relation(fields: [quiz_id], references: [id])
+  reponses       Reponse[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  deletedAt      DateTime?
+}
+
+model Reponse {
+  id             Int          @id @default(autoincrement())
+  utilisateur_id Int
+  question_id    Int
+  reponse_donnee String
+  est_correcte   Boolean
+  temps_reponse  Int?
+  utilisateur    Utilisateur  @relation(fields: [utilisateur_id], references: [id])
+  question       Question     @relation(fields: [question_id], references: [id])
+  createdAt      DateTime     @default(now())
+}
+
+model Invitation {
+  id          Int       @id @default(autoincrement())
+  code_acces  String    @unique @default(uuid())
+  actif       Boolean   @default(true)
+  quiz_id     Int
+  quiz        Quiz      @relation(fields: [quiz_id], references: [id])
+  createdAt   DateTime  @default(now())
+}

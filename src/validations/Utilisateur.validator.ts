@@ -1,0 +1,93 @@
+import { z } from 'zod';
+import { UTILISATEUR_VALIDATION_MESSAGES } from './erreurs_messages/Message.error';
+
+export const registerSchema = z.object({
+  prenom: z
+    .string({ message: UTILISATEUR_VALIDATION_MESSAGES.PRENOM_REQUIRED })
+    .min(2, UTILISATEUR_VALIDATION_MESSAGES.PRENOM_MIN_LENGTH)
+    .max(50, UTILISATEUR_VALIDATION_MESSAGES.PRENOM_MAX_LENGTH),
+  
+  nom: z
+    .string({ message: UTILISATEUR_VALIDATION_MESSAGES.NOM_REQUIRED })
+    .min(2, UTILISATEUR_VALIDATION_MESSAGES.NOM_MIN_LENGTH)
+    .max(50, UTILISATEUR_VALIDATION_MESSAGES.NOM_MAX_LENGTH),
+  
+  email: z
+    .string({ message: UTILISATEUR_VALIDATION_MESSAGES.EMAIL_REQUIRED })
+    .email(UTILISATEUR_VALIDATION_MESSAGES.EMAIL_INVALID)
+    .max(255, UTILISATEUR_VALIDATION_MESSAGES.EMAIL_MAX_LENGTH),
+  
+  password: z
+    .string({ message: UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_REQUIRED })
+    .min(8, UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_MIN_LENGTH)
+    .max(100, UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_MAX_LENGTH)
+    .regex(/[A-Z]/, UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_MUST_CONTAIN_UPPERCASE)
+    .regex(/[a-z]/, UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_MUST_CONTAIN_LOWERCASE)
+    .regex(/[0-9]/, UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_MUST_CONTAIN_NUMBER)
+    .regex(
+      /[^A-Za-z0-9]/,
+      UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_MUST_CONTAIN_SPECIAL
+    ),
+});
+
+// Schéma pour la connexion (login)
+export const loginSchema = z.object({
+  email: z
+    .string({ message: UTILISATEUR_VALIDATION_MESSAGES.EMAIL_REQUIRED })
+    .email(UTILISATEUR_VALIDATION_MESSAGES.EMAIL_INVALID)
+    .max(255, UTILISATEUR_VALIDATION_MESSAGES.EMAIL_MAX_LENGTH),
+  
+  password: z
+    .string({ message: UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_REQUIRED })
+    .min(1, UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_REQUIRED),
+});
+
+// Schéma pour la mise à jour du profil
+export const updateUtilisateurSchema = z.object({
+  prenom: z
+    .string()
+    .min(2, UTILISATEUR_VALIDATION_MESSAGES.PRENOM_MIN_LENGTH)
+    .max(50, UTILISATEUR_VALIDATION_MESSAGES.PRENOM_MAX_LENGTH)
+    .optional(),
+  
+  nom: z
+    .string()
+    .min(2, UTILISATEUR_VALIDATION_MESSAGES.NOM_MIN_LENGTH)
+    .max(50, UTILISATEUR_VALIDATION_MESSAGES.NOM_MAX_LENGTH)
+    .optional(),
+  
+  email: z
+    .string()
+    .email(UTILISATEUR_VALIDATION_MESSAGES.EMAIL_INVALID)
+    .max(255, UTILISATEUR_VALIDATION_MESSAGES.EMAIL_MAX_LENGTH)
+    .optional(),
+  
+  password: z
+    .string()
+    .min(8, UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_MIN_LENGTH)
+    .max(100, UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_MAX_LENGTH)
+    .regex(/[A-Z]/, UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_MUST_CONTAIN_UPPERCASE)
+    .regex(/[a-z]/, UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_MUST_CONTAIN_LOWERCASE)
+    .regex(/[0-9]/, UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_MUST_CONTAIN_NUMBER)
+    .regex(
+      /[^A-Za-z0-9]/,
+      UTILISATEUR_VALIDATION_MESSAGES.PASSWORD_MUST_CONTAIN_SPECIAL
+    )
+    .optional(),
+  
+  role_id: z
+    .number()
+    .int(UTILISATEUR_VALIDATION_MESSAGES.ROLE_ID_INVALID)
+    .positive(UTILISATEUR_VALIDATION_MESSAGES.ROLE_ID_INVALID)
+    .optional(),
+  
+  statut: z
+    .enum(['actif', 'inactif'], {
+      message: UTILISATEUR_VALIDATION_MESSAGES.STATUT_INVALID,
+    })
+    .optional(),
+});
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type UpdateUtilisateurInput = z.infer<typeof updateUtilisateurSchema>;

@@ -1,0 +1,53 @@
+{
+  "name": "quizlab-backend",
+  "version": "1.0.0",
+  "description": "Backend API pour QuizLab - Application de quiz interactifs",
+  "main": "dist/app.js",
+  "scripts": {
+    "dev": "tsx watch src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "quiz",
+    "hono",
+    "nodejs",
+    "api",
+    "backend"
+  ],
+  "author": "Votre nom",
+  "license": "MIT",
+  "dependencies": {
+    "@hono/node-server": "^1.19.5",
+    "@prisma/client": "^6.18.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/pg": "^8.15.5",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.3",
+    "hono": "^4.10.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.9.1",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.18.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
