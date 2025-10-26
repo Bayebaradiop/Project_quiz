@@ -42,6 +42,19 @@ export const ERROR_MESSAGES = {
   FETCH_USER_ERROR: 'Erreur lors de la récupération de l\'utilisateur',
   LOGOUT_ERROR: 'Erreur lors de la déconnexion',
   REGISTRATION_ERROR: 'Erreur lors de l\'inscription',
+  QUIZ_NOT_FOUND: 'Quiz non trouvé',
+  QUIZ_TITLE_REQUIRED: 'Le titre du quiz est requis',
+  QUIZ_TYPE_INVALID: 'Type de quiz invalide',
+  QUIZ_STATUT_INVALID: 'Statut de quiz invalide',
+  QUESTION_NOT_FOUND: 'Question non trouvée',
+  QUESTION_TEXT_REQUIRED: 'Le texte de la question est requis',
+  QUESTION_TYPE_INVALID: 'Type de question invalide',
+  QUESTION_POINTS_INVALID: 'Le nombre de points doit être positif',
+  QUESTION_ORDER_REQUIRED: 'L\'ordre de la question est requis',
+  REPONSE_NOT_FOUND: 'Réponse non trouvée',
+  REPONSE_TEXT_REQUIRED: 'Le texte de la réponse est requis',
+  UNAUTHORIZED: 'Non autorisé',
+  FORBIDDEN: 'Accès interdit',
 } as const;
 
 export const SUCCESS_MESSAGES = {
@@ -50,5 +63,14 @@ export const SUCCESS_MESSAGES = {
   LOGOUT_SUCCESS: 'Déconnexion réussie',
   USER_UPDATED: 'Utilisateur mis à jour avec succès',
   USER_DELETED: 'Utilisateur supprimé avec succès',
+  QUIZ_CREATED: 'Quiz créé avec succès',
+  QUIZ_UPDATED: 'Quiz mis à jour avec succès',
+  QUIZ_DELETED: 'Quiz supprimé avec succès',
+  QUESTION_CREATED: 'Question créée avec succès',
+  QUESTION_UPDATED: 'Question mise à jour avec succès',
+  QUESTION_DELETED: 'Question supprimée avec succès',
+  REPONSE_CREATED: 'Réponse créée avec succès',
+  REPONSE_UPDATED: 'Réponse mise à jour avec succès',
+  REPONSE_DELETED: 'Réponse supprimée avec succès',
 } as const;
 
