@@ -20,7 +20,7 @@ export interface ReponseParticipant {
   id: number;
   participation_id: number;
   question_id: number;
-  reponse_id: number | null;
+  choix_reponse_id: number | null;
   texte_reponse: string | null;
   est_correcte: boolean;
   points_obtenus: number;
@@ -38,9 +38,9 @@ export interface DemarrerParticipationInput {
 export interface SoumettreReponseInput {
   participation_id: number;
   question_id: number;
-  reponse_id?: number | undefined; // Pour choix unique/multiple
-  texte_reponse?: string | undefined; // Pour réponse textuelle
-  temps_reponse?: number | undefined;
+  choix_reponse_id?: number; // ID du choix sélectionné
+  texte_reponse?: string; // Pour texte libre (optionnel)
+  temps_reponse?: number;
 }
 
 export interface TerminerParticipationInput {

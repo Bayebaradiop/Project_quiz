@@ -36,9 +36,16 @@ export class ParticipationRepository {
               select: {
                 id: true,
                 texte: true,
-                options: true,
                 ordre: true,
                 duree: true,
+                choix_reponses: {
+                  select: {
+                    id: true,
+                    texte: true,
+                    ordre: true,
+                  },
+                  orderBy: { ordre: 'asc' },
+                },
               },
               orderBy: { ordre: 'asc' },
             },
@@ -164,7 +171,7 @@ export class ParticipationRepository {
       data: {
         participation_id: data.participation_id,
         question_id: data.question_id,
-        reponse_id: data.reponse_id ?? null,
+        choix_reponse_id: data.choix_reponse_id ?? null,
         texte_reponse: data.texte_reponse ?? null,
         est_correcte: data.est_correcte,
         points_obtenus: data.points_obtenus,
@@ -184,14 +191,22 @@ export class ParticipationRepository {
           select: {
             id: true,
             texte: true,
-            options: true,
-            bonne_reponse: true,
+            choix_reponses: {
+              select: {
+                id: true,
+                texte: true,
+                est_correcte: true,
+                ordre: true,
+              },
+              orderBy: { ordre: 'asc' },
+            },
           },
         },
-        reponse: {
+        choix_reponse: {
           select: {
             id: true,
-            reponse_donnee: true,
+            texte: true,
+            est_correcte: true,
           },
         },
       },

@@ -26,11 +26,10 @@ export class QuestionService {
 
     return await this.questionRepository.create({
       quiz_id,
-      texte_question: data.texte_question,
-      type_question: data.type_question,
-      points: data.points,
-      temps_limite: data.temps_limite ?? null,
+      texte: data.texte,
+      duree: data.duree,
       ordre: data.ordre,
+      choix_reponses: data.choix_reponses,
     });
   }
 

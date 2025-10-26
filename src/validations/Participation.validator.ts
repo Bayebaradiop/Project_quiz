@@ -10,13 +10,13 @@ export const demarrerParticipationSchema = z.object({
 export const soumettreReponseSchema = z.object({
   participation_id: z.number().int().positive('L\'ID de participation doit être positif'),
   question_id: z.number().int().positive('L\'ID de la question doit être positif'),
-  reponse_id: z.number().int().positive('L\'ID de la réponse doit être positif').optional(),
+  choix_reponse_id: z.number().int().positive('L\'ID du choix de réponse doit être positif').optional(),
   texte_reponse: z.string().optional(),
   temps_reponse: z.number().int().nonnegative('Le temps de réponse doit être positif').optional(),
 }).refine(
-  (data) => data.reponse_id !== undefined || data.texte_reponse !== undefined,
+  (data) => data.choix_reponse_id !== undefined || data.texte_reponse !== undefined,
   {
-    message: 'Vous devez fournir soit reponse_id soit texte_reponse',
+    message: 'Vous devez fournir soit choix_reponse_id soit texte_reponse',
   }
 );
 

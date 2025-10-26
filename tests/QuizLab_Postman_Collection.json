@@ -1,0 +1,825 @@
+{
+	"info": {
+		"_postman_id": "quiz-lab-tests-2025",
+		"name": "QuizLab - Tests Complets",
+		"description": "Collection de tests pour QuizLab - Système de quiz avec choix multiples",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentification",
+			"item": [
+				{
+					"name": "Inscription utilisateur",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"prenom\": \"Marie\",\n  \"nom\": \"Durand\",\n  \"email\": \"marie.durand@example.com\",\n  \"password\": \"Marie@1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/utilisateurs/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"utilisateurs",
+								"register"
+							]
+						}
+					}
+				},
+				{
+					"name": "Connexion utilisateur",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Connexion réussie\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.utilisateur).to.have.property('id');",
+									"    ",
+									"    // Sauvegarder l'ID utilisateur",
+									"    pm.environment.set(\"user_id\", jsonData.utilisateur.id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@quizlab.com\",\n  \"password\": \"User@1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/utilisateurs/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"utilisateurs",
+								"login"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Création Quiz",
+			"item": [
+				{
+					"name": "Créer un quiz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Quiz créé avec succès\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('lien_partage');",
+									"    ",
+									"    // Sauvegarder l'ID du quiz et le lien",
+									"    pm.environment.set(\"quiz_id\", jsonData.data.id);",
+									"    pm.environment.set(\"lien_partage\", jsonData.data.lien_partage);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"titre\": \"Quiz de Test - Culture Générale\",\n  \"description\": \"Un quiz complet pour tester le système\",\n  \"type_quiz\": \"instantane\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes"
+							]
+						}
+					}
+				},
+				{
+					"name": "Ajouter Question 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Question 1 créée\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.choix_reponses).to.have.lengthOf(4);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"texte\": \"Quelle est la capitale de la France ?\",\n  \"duree\": 20,\n  \"ordre\": 1,\n  \"choix_reponses\": [\n    {\"texte\": \"Londres\", \"est_correcte\": false, \"ordre\": 1},\n    {\"texte\": \"Paris\", \"est_correcte\": true, \"ordre\": 2},\n    {\"texte\": \"Berlin\", \"est_correcte\": false, \"ordre\": 3},\n    {\"texte\": \"Madrid\", \"est_correcte\": false, \"ordre\": 4}\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes/{{quiz_id}}/questions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes",
+								"{{quiz_id}}",
+								"questions"
+							]
+						}
+					}
+				},
+				{
+					"name": "Ajouter Question 2",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"texte\": \"Combien de continents y a-t-il sur Terre ?\",\n  \"duree\": 20,\n  \"ordre\": 2,\n  \"choix_reponses\": [\n    {\"texte\": \"5\", \"est_correcte\": false, \"ordre\": 1},\n    {\"texte\": \"6\", \"est_correcte\": false, \"ordre\": 2},\n    {\"texte\": \"7\", \"est_correcte\": true, \"ordre\": 3},\n    {\"texte\": \"8\", \"est_correcte\": false, \"ordre\": 4}\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes/{{quiz_id}}/questions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes",
+								"{{quiz_id}}",
+								"questions"
+							]
+						}
+					}
+				},
+				{
+					"name": "Ajouter Question 3",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"texte\": \"Quel est le plus grand océan du monde ?\",\n  \"duree\": 20,\n  \"ordre\": 3,\n  \"choix_reponses\": [\n    {\"texte\": \"Océan Atlantique\", \"est_correcte\": false, \"ordre\": 1},\n    {\"texte\": \"Océan Indien\", \"est_correcte\": false, \"ordre\": 2},\n    {\"texte\": \"Océan Pacifique\", \"est_correcte\": true, \"ordre\": 3},\n    {\"texte\": \"Océan Arctique\", \"est_correcte\": false, \"ordre\": 4}\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes/{{quiz_id}}/questions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes",
+								"{{quiz_id}}",
+								"questions"
+							]
+						}
+					}
+				},
+				{
+					"name": "Publier le quiz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Quiz publié\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.statut).to.equal('publie');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"statut\": \"publie\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes/{{quiz_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes",
+								"{{quiz_id}}"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. CAS 1 - Participation avec Invitation",
+			"item": [
+				{
+					"name": "Envoyer une invitation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Invitation envoyée\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('code_acces');",
+									"    ",
+									"    // Sauvegarder le code d'accès",
+									"    pm.environment.set(\"code_acces\", jsonData.data.code_acces);",
+									"    pm.environment.set(\"invitation_id\", jsonData.data.id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"participant.invite@example.com\",\n  \"nom\": \"Participant\",\n  \"prenom\": \"Invité\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/invitations/quizzes/{{quiz_id}}/invitations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"invitations",
+								"quizzes",
+								"{{quiz_id}}",
+								"invitations"
+							]
+						},
+						"description": "Envoie une invitation par email avec un code d'accès unique"
+					}
+				},
+				{
+					"name": "Démarrer participation (avec code)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Participation démarrée avec code\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.participation).to.have.property('id');",
+									"    pm.expect(jsonData.data.participation.statut).to.equal('en_cours');",
+									"    ",
+									"    // Sauvegarder l'ID de participation",
+									"    pm.environment.set(\"participation_id_invite\", jsonData.data.participation.id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code_acces\": \"{{code_acces}}\",\n  \"email_participant\": \"participant.invite@example.com\",\n  \"nom_participant\": \"Invité Participant\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/participations/code",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"participations",
+								"code"
+							]
+						},
+						"description": "Démarre une participation avec le code d'invitation reçu par email"
+					}
+				},
+				{
+					"name": "Voir les questions (avec code)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Questions récupérées sans est_correcte\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"    ",
+									"    // Vérifier que est_correcte est masqué",
+									"    if (jsonData.data.length > 0 && jsonData.data[0].choix_reponses) {",
+									"        pm.expect(jsonData.data[0].choix_reponses[0]).to.not.have.property('est_correcte');",
+									"    }",
+									"    ",
+									"    // Sauvegarder les IDs des choix corrects (pour le test)",
+									"    // Q1: Paris, Q2: 7, Q3: Pacifique",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes/{{quiz_id}}/questions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes",
+								"{{quiz_id}}",
+								"questions"
+							]
+						},
+						"description": "Récupère les questions avec leurs choix (est_correcte est masqué)"
+					}
+				},
+				{
+					"name": "Soumettre réponse 1 (Correcte)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Réponse 1 enregistrée\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participation_id\": {{participation_id_invite}},\n  \"question_id\": 1,\n  \"choix_reponse_id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/participations/reponses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"participations",
+								"reponses"
+							]
+						},
+						"description": "Soumet une réponse correcte (Paris)"
+					}
+				},
+				{
+					"name": "Soumettre réponse 2 (Incorrecte)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participation_id\": {{participation_id_invite}},\n  \"question_id\": 2,\n  \"choix_reponse_id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/participations/reponses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"participations",
+								"reponses"
+							]
+						},
+						"description": "Soumet une réponse incorrecte (5 au lieu de 7)"
+					}
+				},
+				{
+					"name": "Soumettre réponse 3 (Correcte)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participation_id\": {{participation_id_invite}},\n  \"question_id\": 3,\n  \"choix_reponse_id\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/participations/reponses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"participations",
+								"reponses"
+							]
+						},
+						"description": "Soumet une réponse correcte (Océan Pacifique)"
+					}
+				},
+				{
+					"name": "Terminer participation (avec code)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Participation terminée - Score calculé\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.participation).to.have.property('score');",
+									"    pm.expect(jsonData.data.participation).to.have.property('pourcentage');",
+									"    pm.expect(jsonData.data.participation.statut).to.equal('termine');",
+									"    ",
+									"    console.log('Score:', jsonData.data.participation.score);",
+									"    console.log('Pourcentage:', jsonData.data.participation.pourcentage + '%');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participation_id\": {{participation_id_invite}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/participations/terminer",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"participations",
+								"terminer"
+							]
+						},
+						"description": "Termine la participation et calcule le score final"
+					}
+				}
+			],
+			"description": "Scénario complet : Invitation → Code d'accès → Participation → Réponses → Score"
+		},
+		{
+			"name": "4. CAS 2 - Participation Publique Anonyme",
+			"item": [
+				{
+					"name": "Démarrer participation publique",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Participation publique démarrée\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.participation).to.have.property('id');",
+									"    pm.expect(jsonData.data.participation.statut).to.equal('en_cours');",
+									"    pm.expect(jsonData.data.participation.code_acces).to.be.null;",
+									"    ",
+									"    // Sauvegarder l'ID de participation",
+									"    pm.environment.set(\"participation_id_public\", jsonData.data.participation.id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email_participant\": \"anonyme@example.com\",\n  \"nom_participant\": \"Participant Anonyme\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/participations/public/{{lien_partage}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"participations",
+								"public",
+								"{{lien_partage}}"
+							]
+						},
+						"description": "Démarre une participation via le lien public (sans invitation)"
+					}
+				},
+				{
+					"name": "Voir les questions (public)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Questions récupérées - Sécurité OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    ",
+									"    // Vérifier que est_correcte n'est pas visible",
+									"    if (jsonData.data.length > 0 && jsonData.data[0].choix_reponses) {",
+									"        pm.expect(jsonData.data[0].choix_reponses[0]).to.not.have.property('est_correcte');",
+									"        console.log('✅ Sécurité: est_correcte est bien masqué');",
+									"    }",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes/{{quiz_id}}/questions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes",
+								"{{quiz_id}}",
+								"questions"
+							]
+						}
+					}
+				},
+				{
+					"name": "Soumettre réponse 1 (Correcte)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participation_id\": {{participation_id_public}},\n  \"question_id\": 1,\n  \"choix_reponse_id\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/participations/reponses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"participations",
+								"reponses"
+							]
+						}
+					}
+				},
+				{
+					"name": "Soumettre réponse 2 (Correcte)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participation_id\": {{participation_id_public}},\n  \"question_id\": 2,\n  \"choix_reponse_id\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/participations/reponses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"participations",
+								"reponses"
+							]
+						}
+					}
+				},
+				{
+					"name": "Soumettre réponse 3 (Incorrecte)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participation_id\": {{participation_id_public}},\n  \"question_id\": 3,\n  \"choix_reponse_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/participations/reponses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"participations",
+								"reponses"
+							]
+						},
+						"description": "Soumet une réponse incorrecte (Atlantique au lieu de Pacifique)"
+					}
+				},
+				{
+					"name": "Terminer participation publique",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Participation publique terminée\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.participation.statut).to.equal('termine');",
+									"    ",
+									"    console.log('Score final:', jsonData.data.participation.score + '/' + jsonData.data.participation.score_max);",
+									"    console.log('Pourcentage:', jsonData.data.participation.pourcentage + '%');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participation_id\": {{participation_id_public}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/participations/terminer",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"participations",
+								"terminer"
+							]
+						}
+					}
+				}
+			],
+			"description": "Scénario complet : Lien public → Participation anonyme → Réponses → Score"
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}

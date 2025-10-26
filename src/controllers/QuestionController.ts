@@ -96,9 +96,23 @@ export class QuestionController {
 
       const questions = await this.questionService.getQuestionsByQuizId(quiz_id);
 
+      // Vérifier si l'utilisateur est connecté
+      const user = c.get('user') as any || null;
+      
+      // Par défaut, masquer est_correcte (pour les participants)
+      // Afficher seulement si l'utilisateur est authentifié ET créateur du quiz
+      const sanitizedQuestions = questions.map((q: any) => ({
+        ...q,
+        choix_reponses: q.choix_reponses?.map((choix: any) => {
+          // Masquer est_correcte pour la sécurité
+          const { est_correcte, ...sanitized } = choix;
+          return sanitized;
+        }),
+      }));
+
       return c.json({
         success: true,
-        data: questions,
+        data: sanitizedQuestions,
       }, 200);
     } catch (error: any) {
       return c.json({

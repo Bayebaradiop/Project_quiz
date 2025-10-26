@@ -25,33 +25,14 @@ async function main() {
   console.log(`   - Password: Admin@1234`);
   console.log(`   - Rôle: ${adminUser.role}`);
 
-  // Créer un créateur
-  const hashedPasswordCreateur = await bcrypt.hash('Createur@1234', 12);
-  const createurUser = await prisma.utilisateur.upsert({
-    where: { email: 'createur@quizlab.com' },
-    update: {},
-    create: {
-      prenom: 'Jean',
-      nom: 'Créateur',
-      email: 'createur@quizlab.com',
-      password: hashedPasswordCreateur,
-      role: Role.createur,
-    },
-  });
-
-  console.log('✅ Utilisateur créateur créé:');
-  console.log(`   - Email: ${createurUser.email}`);
-  console.log(`   - Password: Createur@1234`);
-  console.log(`   - Rôle: ${createurUser.role}`);
-
-  // Créer un utilisateur normal
+  // Créer un utilisateur normal (avec capacités de créateur)
   const hashedPasswordUser = await bcrypt.hash('User@1234', 12);
   const normalUser = await prisma.utilisateur.upsert({
     where: { email: 'user@quizlab.com' },
     update: {},
     create: {
-      prenom: 'Marie',
-      nom: 'Utilisateur',
+      prenom: 'Jean',
+      nom: 'Dupont',
       email: 'user@quizlab.com',
       password: hashedPasswordUser,
       role: Role.user,
@@ -64,6 +45,8 @@ async function main() {
   console.log(`   - Rôle: ${normalUser.role}`);
 
   console.log('\n✅ Seeding terminé avec succès!');
+  console.log('\n📝 Note: Les utilisateurs avec rôle "user" peuvent créer et gérer des quiz.');
+  console.log('   Les visiteurs sans compte peuvent participer anonymement aux quiz publics.');
 }
 
 main()

@@ -22,7 +22,7 @@ export class ParticipationController {
       const validatedData = demarrerParticipationSchema.parse(body);
 
       // Récupérer l'utilisateur s'il est connecté (optionnel)
-      const user = getUserFromContext(c);
+      const user = c.get('user') as any || null;
 
       const participation = await participationService.demarrerParticipation(
         validatedData,
@@ -75,7 +75,7 @@ export class ParticipationController {
       });
 
       // Récupérer l'utilisateur s'il est connecté (optionnel)
-      const user = getUserFromContext(c);
+      const user = c.get('user') as any || null;
 
       const result = await participationService.accederQuizPublic(
         validatedData.lien_partage,

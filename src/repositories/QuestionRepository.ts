@@ -1,90 +1,99 @@
 import { PrismaClient } from '@prisma/client';
-import { Question, TypeQuestion } from '../interfaces/QuestionInterface';
+import { Question, CreateQuestionInput, UpdateQuestionInput } from '../interfaces/QuestionInterface';
 
 const prisma = new PrismaClient();
 
 export class QuestionRepository {
   async create(data: {
     quiz_id: number;
-    texte_question: string;
-    type_question: TypeQuestion;
-    points?: number;
-    temps_limite?: number | null;
+    texte: string;
+    duree: number;
     ordre: number;
+    choix_reponses: Array<{
+      texte: string;
+      est_correcte: boolean;
+      ordre: number;
+    }>;
   }): Promise<Question> {
     return await prisma.question.create({
       data: {
-        ...data,
-        points: data.points ?? 1,
-        temps_limite: data.temps_limite ?? null,
+        quiz_id: data.quiz_id,
+        texte: data.texte,
+        duree: data.duree,
+        ordre: data.ordre,
+        choix_reponses: {
+          create: data.choix_reponses,
+        },
       },
-    });
+      include: {
+        choix_reponses: {
+          orderBy: { ordre: 'asc' },
+        },
+      },
+    }) as Question;
   }
 
   async findAll(): Promise<Question[]> {
     return await prisma.question.findMany({
       orderBy: { ordre: 'asc' },
-    });
+      include: {
+        choix_reponses: {
+          orderBy: { ordre: 'asc' },
+        },
+      },
+    }) as Question[];
   }
 
   async findById(id: number): Promise<Question | null> {
     return await prisma.question.findUnique({
       where: { id },
-    });
+      include: {
+        choix_reponses: {
+          orderBy: { ordre: 'asc' },
+        },
+      },
+    }) as Question | null;
   }
 
   async findByQuizId(quiz_id: number): Promise<Question[]> {
     return await prisma.question.findMany({
       where: { quiz_id },
       orderBy: { ordre: 'asc' },
-    });
+      include: {
+        choix_reponses: {
+          orderBy: { ordre: 'asc' },
+        },
+      },
+    }) as Question[];
   }
 
   async update(
     id: number,
-    data: {
-      texte_question?: string | null;
-      type_question?: TypeQuestion;
-      points?: number | null;
-      temps_limite?: number | null;
-      ordre?: number | null;
-    }
+    data: UpdateQuestionInput
   ): Promise<Question> {
-    const updateData: any = {};
-    if (data.texte_question !== undefined) updateData.texte_question = data.texte_question;
-    if (data.type_question !== undefined) updateData.type_question = data.type_question;
-    if (data.points !== undefined) updateData.points = data.points;
-    if (data.temps_limite !== undefined) updateData.temps_limite = data.temps_limite ?? null;
-    if (data.ordre !== undefined) updateData.ordre = data.ordre;
-
     return await prisma.question.update({
       where: { id },
-      data: updateData,
-    });
-  }
-
-  async delete(id: number): Promise<Question> {
-    return await prisma.question.delete({
-      where: { id },
-    });
-  }
-
-  async findWithReponses(id: number) {
-    return await prisma.question.findUnique({
-      where: { id },
+      data,
       include: {
-        reponses: {
+        choix_reponses: {
           orderBy: { ordre: 'asc' },
         },
       },
-    });
+    }) as Question;
   }
 
-  async getMaxOrdre(quiz_id: number): Promise<number> {
-    const result = await prisma.question.aggregate({
+  async delete(id: number): Promise<Question> {
+    return await prisma.question.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    }) as Question;
+  }
+
+  async getNextOrdre(quiz_id: number): Promise<number> {
+    const lastQuestion = await prisma.question.findFirst({
       where: { quiz_id },
-      _max: { ordre: true },
+      orderBy: { ordre: 'desc' },
     });
-    return result._max.ordre ?? 0;
+    return (lastQuestion?.ordre || 0) + 1;
   }
 }

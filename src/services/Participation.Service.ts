@@ -1,6 +1,7 @@
 import { ParticipationRepository } from '../repositories/ParticipationRepository';
 import { QuizRepository } from '../repositories/QuizRepository';
 import { InvitationRepository } from '../repositories/InvitationRepository';
+import { QuestionRepository } from '../repositories/QuestionRepository';
 import {
   Participation,
   DemarrerParticipationInput,
@@ -12,6 +13,7 @@ import { ERROR_MESSAGES } from '../validations/erreurs_messages/Message.error';
 const participationRepository = new ParticipationRepository();
 const quizRepository = new QuizRepository();
 const invitationRepository = new InvitationRepository();
+const questionRepository = new QuestionRepository();
 
 export class ParticipationService {
   /**
@@ -135,9 +137,8 @@ export class ParticipationService {
       throw new Error('Vous avez déjà répondu à cette question');
     }
 
-    // Récupérer les informations de la question depuis le quiz
-    const quiz = participation.quiz as any;
-    const question = quiz.questions.find((q: any) => q.id === data.question_id);
+    // Récupérer la question avec les choix de réponses
+    const question = await questionRepository.findById(data.question_id);
     if (!question) {
       throw new Error('Question introuvable');
     }
@@ -146,19 +147,27 @@ export class ParticipationService {
     let est_correcte = false;
     let points_obtenus = 0;
 
-    if (data.reponse_id) {
-      // Réponse à choix (unique ou multiple)
-      // TODO: Implémenter la logique de vérification avec les options
-      // Pour l'instant, on vérifie simplement si la réponse existe
-      est_correcte = question.bonne_reponse === data.reponse_id.toString();
-    } else if (data.texte_reponse) {
-      // Réponse textuelle - comparaison simple (à améliorer)
-      est_correcte = data.texte_reponse.toLowerCase().trim() === 
-                     question.bonne_reponse.toLowerCase().trim();
+    if (data.choix_reponse_id) {
+      // Réponse à choix multiple - vérifier si le choix est correct
+      const choixSelectionne = question.choix_reponses?.find(
+        (c: any) => c.id === data.choix_reponse_id
+      );
+      
+      if (!choixSelectionne) {
+        throw new Error('Choix de réponse invalide');
+      }
+      
+      est_correcte = choixSelectionne.est_correcte;
+    } else if (data.texte_reponse && typeof data.texte_reponse === 'string') {
+      // Réponse textuelle - vérifier contre tous les choix corrects
+      const reponseNormalisee = data.texte_reponse.toUpperCase().trim();
+      est_correcte = question.choix_reponses?.some((c: any) => 
+        c.est_correcte && c.texte.toUpperCase().trim() === reponseNormalisee
+      ) || false;
     }
 
     if (est_correcte) {
-      points_obtenus = question.points || 1;
+      points_obtenus = 1; // 1 point par bonne réponse
     }
 
     // Enregistrer la réponse

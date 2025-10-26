@@ -1,34 +1,44 @@
-export type TypeQuestion = 'choix_unique' | 'choix_multiple' | 'vrai_faux' | 'texte_court';
-
 export interface Question {
   id: number;
   quiz_id: number;
-  texte_question: string;
-  type_question: TypeQuestion;
-  points: number;
-  temps_limite: number | null;
+  texte: string;
+  duree: number;
   ordre: number;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+  choix_reponses?: ChoixReponse[];
+}
+
+export interface ChoixReponse {
+  id: number;
+  question_id: number;
+  texte: string;
+  est_correcte: boolean;
+  ordre: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateQuestionInput {
-  texte_question: string;
-  type_question: TypeQuestion;
-  points?: number;
-  temps_limite?: number | null;
+  texte: string;
+  duree: number;
+  ordre: number;
+  choix_reponses: CreateChoixReponseInput[];
+}
+
+export interface CreateChoixReponseInput {
+  texte: string;
+  est_correcte: boolean;
   ordre: number;
 }
 
 export interface UpdateQuestionInput {
-  texte_question?: string | null;
-  type_question?: TypeQuestion;
-  points?: number | null;
-  temps_limite?: number | null;
-  ordre?: number | null;
+  texte?: string;
+  duree?: number;
+  ordre?: number;
 }
 
 export interface QuestionWithReponses extends Question {
-  reponses: any[];
+  choix_reponses: ChoixReponse[];
 }
