@@ -17,6 +17,11 @@ export class QuizRepository {
         ...data,
         description: data.description ?? null,
       },
+      include: {
+        questions: true,
+        invitations: true,
+        participations: true,
+      },
     });
   }
 
