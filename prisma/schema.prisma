@@ -15,6 +15,7 @@ enum StatutUtilisateur {
 enum Role {
   user
   admin
+  createur
 }
 
 enum StatutQuiz {
@@ -25,6 +26,13 @@ enum StatutQuiz {
 enum TypeQuiz {
   instantane
   programme
+}
+
+enum StatutInvitation {
+  en_attente
+  accepte
+  refuse
+  expire
 }
 
 model Utilisateur {
@@ -86,10 +94,22 @@ model Reponse {
 }
 
 model Invitation {
-  id          Int       @id @default(autoincrement())
-  code_acces  String    @unique @default(uuid())
-  actif       Boolean   @default(true)
-  quiz_id     Int
-  quiz        Quiz      @relation(fields: [quiz_id], references: [id])
-  createdAt   DateTime  @default(now())
+  id               Int              @id @default(autoincrement())
+  quiz_id          Int
+  email            String
+  nom              String?
+  prenom           String?
+  statut           StatutInvitation @default(en_attente)
+  code_acces       String           @unique
+  date_envoi       DateTime         @default(now())
+  date_expiration  DateTime
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  deletedAt        DateTime?
+  
+  quiz Quiz @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+
+  @@index([quiz_id])
+  @@index([code_acces])
+  @@index([email])
 }

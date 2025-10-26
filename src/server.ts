@@ -3,6 +3,10 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { ENV, validateEnv } from './config/env.config';
 import utilisateursRoutes from './routes/utilisateurs.routes';
+import quizzesRoutes from './routes/quizzes.routes';
+import questionsRoutes from './routes/questions.routes';
+import reponsesRoutes from './routes/reponses.routes';
+import { invitationRoutes } from './routes/invitations.routes';
 
 validateEnv();
 
@@ -28,6 +32,10 @@ app.get('/', (c) => {
 });
 
 app.route('/api/v1/utilisateurs', utilisateursRoutes);
+app.route('/api/v1/quizzes', quizzesRoutes);
+app.route('/api/v1', questionsRoutes);
+app.route('/api/v1', reponsesRoutes);
+app.route('/api/v1/invitations', invitationRoutes);
 
 app.notFound((c) => {
   return c.json({
