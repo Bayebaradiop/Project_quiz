@@ -55,6 +55,7 @@ export const ERROR_MESSAGES = {
   REPONSE_TEXT_REQUIRED: 'Le texte de la réponse est requis',
   INVITATION_NOT_FOUND: 'Invitation non trouvée',
   INVALID_ACCESS_CODE: 'Code d\'accès invalide',
+  INVALID_CODE: 'Code d\'accès invalide',
   INVITATION_EXPIRED: 'Cette invitation a expiré',
   INVITATION_REFUSED: 'Cette invitation a été refusée',
   UNAUTHORIZED: 'Non autorisé',

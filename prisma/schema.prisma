@@ -35,6 +35,12 @@ enum StatutInvitation {
   expire
 }
 
+enum StatutParticipation {
+  en_cours
+  termine
+  abandonne
+}
+
 model Utilisateur {
   id        Int       @id @default(autoincrement())
   prenom    String
@@ -45,6 +51,7 @@ model Utilisateur {
   role      Role      @default(user)
   quizzes   Quiz[]    @relation("CreateurQuizzes")
   reponses  Reponse[]
+  participations Participation[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -61,6 +68,7 @@ model Quiz {
   createur     Utilisateur   @relation("CreateurQuizzes", fields: [createur_id], references: [id])
   questions    Question[]
   invitations  Invitation[]
+  participations Participation[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   deletedAt    DateTime?
@@ -76,6 +84,7 @@ model Question {
   quiz_id        Int
   quiz           Quiz       @relation(fields: [quiz_id], references: [id])
   reponses       Reponse[]
+  reponses_participants ReponseParticipant[]
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   deletedAt      DateTime?
@@ -90,6 +99,7 @@ model Reponse {
   temps_reponse  Int?
   utilisateur    Utilisateur  @relation(fields: [utilisateur_id], references: [id])
   question       Question     @relation(fields: [question_id], references: [id])
+  reponses_participants ReponseParticipant[]
   createdAt      DateTime     @default(now())
 }
 
@@ -112,4 +122,50 @@ model Invitation {
   @@index([quiz_id])
   @@index([code_acces])
   @@index([email])
+}
+
+model Participation {
+  id                Int       @id @default(autoincrement())
+  quiz_id           Int
+  utilisateur_id    Int?      // Nullable pour les participations anonymes
+  email_participant String?   // Pour les anonymes
+  nom_participant   String?   // Pour les anonymes
+  code_acces        String?   // Si participation via invitation
+  score             Int?      // Score obtenu
+  score_max         Int?      // Score maximum possible
+  pourcentage       Float?    // Pourcentage de réussite
+  temps_total       Int?      // Temps total en secondes
+  statut            StatutParticipation @default(en_cours)
+  date_debut        DateTime  @default(now())
+  date_fin          DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  quiz              Quiz              @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  utilisateur       Utilisateur?      @relation(fields: [utilisateur_id], references: [id])
+  reponses          ReponseParticipant[]
+  
+  @@index([quiz_id])
+  @@index([utilisateur_id])
+  @@index([email_participant])
+  @@index([code_acces])
+}
+
+model ReponseParticipant {
+  id               Int           @id @default(autoincrement())
+  participation_id Int
+  question_id      Int
+  reponse_id       Int?          // ID de la réponse choisie (pour choix unique/multiple)
+  texte_reponse    String?       // Pour les réponses texte libre
+  est_correcte     Boolean
+  points_obtenus   Int           @default(0)
+  temps_reponse    Int?          // Temps en secondes
+  createdAt        DateTime      @default(now())
+  
+  participation    Participation @relation(fields: [participation_id], references: [id], onDelete: Cascade)
+  question         Question      @relation(fields: [question_id], references: [id])
+  reponse          Reponse?      @relation(fields: [reponse_id], references: [id])
+  
+  @@index([participation_id])
+  @@index([question_id])
 }
