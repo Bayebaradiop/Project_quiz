@@ -1,0 +1,96 @@
+import { QuizRepository } from '../repositories/QuizRepository';
+import { Quiz } from '../interfaces/QuizInterface';
+import { CreateQuizInput, UpdateQuizInput } from '../validations/Quiz.validator';
+import { ERROR_MESSAGES } from '../validations/erreurs_messages/Message.error';
+import { randomBytes } from 'crypto';
+
+export class QuizService {
+  private quizRepository: QuizRepository;
+
+  constructor() {
+    this.quizRepository = new QuizRepository();
+  }
+
+  private generateLienPartage(): string {
+    return randomBytes(16).toString('hex');
+  }
+
+  async createQuiz(data: CreateQuizInput, createur_id: number): Promise<Quiz> {
+    const lien_partage = this.generateLienPartage();
+
+    return await this.quizRepository.create({
+      titre: data.titre,
+      description: data.description ?? null,
+      type_quiz: data.type_quiz,
+      lien_partage,
+      createur_id,
+      statut: data.statut || 'brouillon',
+    });
+  }
+
+  async getQuizzes(): Promise<Quiz[]> {
+    return await this.quizRepository.findAll();
+  }
+
+  async getQuizzesByCreateur(createur_id: number): Promise<Quiz[]> {
+    return await this.quizRepository.findByCreateur(createur_id);
+  }
+
+  async getQuizById(id: number): Promise<Quiz> {
+    const quiz = await this.quizRepository.findById(id);
+    if (!quiz) {
+      throw new Error(ERROR_MESSAGES.QUIZ_NOT_FOUND);
+    }
+    return quiz;
+  }
+
+  async getQuizByLienPartage(lien_partage: string): Promise<Quiz> {
+    const quiz = await this.quizRepository.findByLienPartage(lien_partage);
+    if (!quiz) {
+      throw new Error(ERROR_MESSAGES.QUIZ_NOT_FOUND);
+    }
+    return quiz;
+  }
+
+  async updateQuiz(id: number, data: UpdateQuizInput, createur_id: number): Promise<Quiz> {
+    const quiz = await this.quizRepository.findById(id);
+    
+    if (!quiz) {
+      throw new Error(ERROR_MESSAGES.QUIZ_NOT_FOUND);
+    }
+
+    if (quiz.createur_id !== createur_id) {
+      throw new Error(ERROR_MESSAGES.FORBIDDEN);
+    }
+
+    const updateData: any = {};
+    if (data.titre !== undefined) updateData.titre = data.titre;
+    if (data.description !== undefined) updateData.description = data.description ?? null;
+    if (data.type_quiz !== undefined) updateData.type_quiz = data.type_quiz;
+    if (data.statut !== undefined) updateData.statut = data.statut;
+
+    return await this.quizRepository.update(id, updateData);
+  }
+
+  async deleteQuiz(id: number, createur_id: number): Promise<Quiz> {
+    const quiz = await this.quizRepository.findById(id);
+    
+    if (!quiz) {
+      throw new Error(ERROR_MESSAGES.QUIZ_NOT_FOUND);
+    }
+
+    if (quiz.createur_id !== createur_id) {
+      throw new Error(ERROR_MESSAGES.FORBIDDEN);
+    }
+
+    return await this.quizRepository.delete(id);
+  }
+
+  async getQuizWithQuestions(id: number) {
+    const quiz = await this.quizRepository.findWithQuestions(id);
+    if (!quiz) {
+      throw new Error(ERROR_MESSAGES.QUIZ_NOT_FOUND);
+    }
+    return quiz;
+  }
+}
