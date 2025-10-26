@@ -673,3 +673,405 @@ Content-Type: application/json
 ```
 
 ---
+
+## Tests Quiz
+
+---
+
+### 1. Créer un Quiz (POST) ✅
+
+**URL:** `http://localhost:3000/api/v1/quizzes`
+
+**Méthode:** `POST`
+
+**Headers:**
+```
+Content-Type: application/json
+```
+
+**Auth:** Bearer Token (utilisateur authentifié)
+
+**Body:**
+```json
+{
+  "titre": "Quiz JavaScript Débutant",
+  "description": "Testez vos connaissances en JavaScript",
+  "type_quiz": "instantane",
+  "statut": "brouillon"
+}
+```
+
+**Réponse attendue (201):**
+```json
+{
+  "success": true,
+  "message": "Quiz créé avec succès",
+  "data": {
+    "id": 1,
+    "titre": "Quiz JavaScript Débutant",
+    "description": "Testez vos connaissances en JavaScript",
+    "type_quiz": "instantane",
+    "lien_partage": "a1b2c3d4e5f6g7h8",
+    "statut": "brouillon",
+    "createur_id": 1,
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z",
+    "deletedAt": null
+  }
+}
+```
+
+---
+
+### 2. Obtenir tous les Quiz (GET) ✅
+
+**URL:** `http://localhost:3000/api/v1/quizzes`
+
+**Méthode:** `GET`
+
+**Auth:** Bearer Token
+
+**Réponse attendue (200):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "titre": "Quiz JavaScript Débutant",
+      "description": "Testez vos connaissances en JavaScript",
+      "type_quiz": "instantane",
+      "lien_partage": "a1b2c3d4e5f6g7h8",
+      "statut": "brouillon",
+      "createur_id": 1,
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "updatedAt": "2024-01-15T10:00:00.000Z",
+      "deletedAt": null
+    }
+  ]
+}
+```
+
+---
+
+### 3. Obtenir mes Quiz (GET) ✅
+
+**URL:** `http://localhost:3000/api/v1/quizzes/mes-quiz`
+
+**Méthode:** `GET`
+
+**Auth:** Bearer Token
+
+**Réponse attendue (200):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "titre": "Quiz JavaScript Débutant",
+      "description": "Testez vos connaissances en JavaScript",
+      "type_quiz": "instantane",
+      "lien_partage": "a1b2c3d4e5f6g7h8",
+      "statut": "brouillon",
+      "createur_id": 1,
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "updatedAt": "2024-01-15T10:00:00.000Z",
+      "deletedAt": null
+    }
+  ]
+}
+```
+
+---
+
+### 4. Obtenir un Quiz par ID (GET) ✅
+
+**URL:** `http://localhost:3000/api/v1/quizzes/1`
+
+**Méthode:** `GET`
+
+**Auth:** Bearer Token
+
+**Réponse attendue (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "titre": "Quiz JavaScript Débutant",
+    "description": "Testez vos connaissances en JavaScript",
+    "type_quiz": "instantane",
+    "lien_partage": "a1b2c3d4e5f6g7h8",
+    "statut": "brouillon",
+    "createur_id": 1,
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z",
+    "deletedAt": null
+  }
+}
+```
+
+**Réponse en cas d'erreur (404):**
+```json
+{
+  "success": false,
+  "message": "Quiz non trouvé"
+}
+```
+
+---
+
+### 5. Obtenir un Quiz par lien de partage (GET) ⚡ Sans Auth
+
+**URL:** `http://localhost:3000/api/v1/quizzes/partage/a1b2c3d4e5f6g7h8`
+
+**Méthode:** `GET`
+
+**Auth:** Aucune (accès public pour les participants)
+
+**Réponse attendue (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "titre": "Quiz JavaScript Débutant",
+    "description": "Testez vos connaissances en JavaScript",
+    "type_quiz": "instantane",
+    "lien_partage": "a1b2c3d4e5f6g7h8",
+    "statut": "publie",
+    "createur_id": 1,
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z",
+    "deletedAt": null
+  }
+}
+```
+
+---
+
+### 6. Obtenir un Quiz avec ses Questions (GET) ⚡ Sans Auth
+
+**URL:** `http://localhost:3000/api/v1/quizzes/1/questions`
+
+**Méthode:** `GET`
+
+**Auth:** Aucune (accès public)
+
+**Réponse attendue (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "titre": "Quiz JavaScript Débutant",
+    "description": "Testez vos connaissances en JavaScript",
+    "type_quiz": "instantane",
+    "lien_partage": "a1b2c3d4e5f6g7h8",
+    "statut": "publie",
+    "createur_id": 1,
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z",
+    "deletedAt": null,
+    "questions": []
+  }
+}
+```
+
+---
+
+### 7. Mettre à jour un Quiz (PUT) ✅
+
+**URL:** `http://localhost:3000/api/v1/quizzes/1`
+
+**Méthode:** `PUT`
+
+**Headers:**
+```
+Content-Type: application/json
+```
+
+**Auth:** Bearer Token (créateur du quiz uniquement)
+
+**Body:**
+```json
+{
+  "titre": "Quiz JavaScript Intermédiaire",
+  "description": "Niveau intermédiaire en JavaScript",
+  "type_quiz": "programme",
+  "statut": "publie"
+}
+```
+
+**Réponse attendue (200):**
+```json
+{
+  "success": true,
+  "message": "Quiz mis à jour avec succès",
+  "data": {
+    "id": 1,
+    "titre": "Quiz JavaScript Intermédiaire",
+    "description": "Niveau intermédiaire en JavaScript",
+    "type_quiz": "programme",
+    "lien_partage": "a1b2c3d4e5f6g7h8",
+    "statut": "publie",
+    "createur_id": 1,
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T11:00:00.000Z",
+    "deletedAt": null
+  }
+}
+```
+
+**Réponse en cas d'accès interdit (403):**
+```json
+{
+  "success": false,
+  "message": "Accès interdit"
+}
+```
+
+---
+
+### 8. Supprimer un Quiz (DELETE) ✅
+
+**URL:** `http://localhost:3000/api/v1/quizzes/1`
+
+**Méthode:** `DELETE`
+
+**Auth:** Bearer Token (créateur du quiz uniquement)
+
+**Réponse attendue (200):**
+```json
+{
+  "success": true,
+  "message": "Quiz supprimé avec succès"
+}
+```
+
+**Réponse en cas d'accès interdit (403):**
+```json
+{
+  "success": false,
+  "message": "Accès interdit"
+}
+```
+
+---
+
+### 9. Cas d'erreur - Validation du Quiz (POST)
+
+**URL:** `http://localhost:3000/api/v1/quizzes`
+
+**Méthode:** `POST`
+
+**Auth:** Bearer Token
+
+**Body:** (données invalides)
+```json
+{
+  "titre": "AB",
+  "type_quiz": "invalid_type"
+}
+```
+
+**Réponse attendue (400):**
+```json
+{
+  "success": false,
+  "message": "Erreur de validation",
+  "errors": [
+    {
+      "field": "titre",
+      "message": "Le titre doit contenir au moins 3 caractères"
+    },
+    {
+      "field": "type_quiz",
+      "message": "Le type de quiz doit être \"instantane\" ou \"programme\""
+    }
+  ]
+}
+```
+
+---
+
+### 10. Cas d'erreur - Non authentifié (POST)
+
+**URL:** `http://localhost:3000/api/v1/quizzes`
+
+**Méthode:** `POST`
+
+**Auth:** Aucune
+
+**Body:**
+```json
+{
+  "titre": "Quiz Test",
+  "type_quiz": "instantane"
+}
+```
+
+**Réponse attendue (401):**
+```json
+{
+  "success": false,
+  "message": "Token non fourni"
+}
+```
+
+---
+
+## Notes importantes
+
+### Types de Quiz
+- **instantane**: Les participants répondent en temps réel, question par question
+- **programme**: Quiz planifié avec date/heure de début
+
+### Statuts de Quiz
+- **brouillon**: Quiz en cours de création, non accessible aux participants
+- **publie**: Quiz publié et accessible via le lien de partage
+
+### Permissions
+- **Création**: Utilisateurs authentifiés uniquement
+- **Lecture**: 
+  - Liste des quiz: Authentification requise
+  - Quiz spécifique par ID: Authentification requise
+  - Quiz par lien de partage: Accès public (pour les participants)
+  - Quiz avec questions: Accès public (pour les participants)
+- **Modification/Suppression**: Créateur du quiz uniquement
+
+### Lien de partage
+- Généré automatiquement lors de la création du quiz
+- Format: Chaîne hexadécimale de 32 caractères
+- Permet aux participants sans compte d'accéder au quiz
+- Le statut du quiz doit être "publie" pour être accessible via le lien
+
+---
+
+## Notes importantes
+
+### Workflow de test recommandé
+1. **D'abord**: Créer un compte utilisateur (Inscription)
+2. **Ensuite**: Se connecter (Login) pour obtenir le cookie
+3. **Puis**: Tester les endpoints protégés (création quiz, modification, suppression)
+4. **Enfin**: Tester les endpoints publics (accès via lien de partage)
+
+### Gestion des cookies dans Postman
+- Les cookies sont automatiquement gérés par Postman
+- Après le login, le cookie `token` est stocké automatiquement
+- Il est envoyé automatiquement avec chaque requête suivante
+- Pour se déconnecter, appelez l'endpoint Logout
+
+### Codes d'erreur HTTP
+- **200**: Succès
+- **201**: Création réussie
+- **400**: Erreur de validation (données invalides)
+- **401**: Non authentifié (token manquant ou invalide)
+- **403**: Accès interdit (pas les permissions nécessaires)
+- **404**: Ressource non trouvée
+- **500**: Erreur serveur
+
+---
+
+**Documentation créée pour les développeurs frontend** ✨
