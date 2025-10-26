@@ -28,12 +28,44 @@ export class QuizRepository {
   async findAll(): Promise<Quiz[]> {
     return await prisma.quiz.findMany({
       orderBy: { createdAt: 'desc' },
+      include: {
+        questions: {
+          orderBy: { ordre: 'asc' },
+          include: {
+            choix_reponses: {
+              orderBy: { ordre: 'asc' },
+            },
+          },
+        },
+        invitations: {
+          orderBy: { createdAt: 'desc' },
+        },
+        participations: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
     });
   }
 
   async findById(id: number): Promise<Quiz | null> {
     return await prisma.quiz.findUnique({
       where: { id },
+      include: {
+        questions: {
+          orderBy: { ordre: 'asc' },
+          include: {
+            choix_reponses: {
+              orderBy: { ordre: 'asc' },
+            },
+          },
+        },
+        invitations: {
+          orderBy: { createdAt: 'desc' },
+        },
+        participations: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
     });
   }
 
@@ -41,12 +73,44 @@ export class QuizRepository {
     return await prisma.quiz.findMany({
       where: { createur_id },
       orderBy: { createdAt: 'desc' },
+      include: {
+        questions: {
+          orderBy: { ordre: 'asc' },
+          include: {
+            choix_reponses: {
+              orderBy: { ordre: 'asc' },
+            },
+          },
+        },
+        invitations: {
+          orderBy: { createdAt: 'desc' },
+        },
+        participations: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
     });
   }
 
   async findByLienPartage(lien_partage: string): Promise<Quiz | null> {
     return await prisma.quiz.findUnique({
       where: { lien_partage },
+      include: {
+        questions: {
+          orderBy: { ordre: 'asc' },
+          include: {
+            choix_reponses: {
+              orderBy: { ordre: 'asc' },
+            },
+          },
+        },
+        invitations: {
+          orderBy: { createdAt: 'desc' },
+        },
+        participations: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
     });
   }
 
