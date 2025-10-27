@@ -47,10 +47,54 @@ export class QuizRepository {
     });
   }
 
+  async findAllPaginated(skip: number, take: number): Promise<Quiz[]> {
+    return await prisma.quiz.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        createur: { // ✨ Inclure le créateur
+          select: {
+            id: true,
+            prenom: true,
+            nom: true,
+            email: true,
+          },
+        },
+        questions: {
+          orderBy: { ordre: 'asc' },
+          include: {
+            choix_reponses: {
+              orderBy: { ordre: 'asc' },
+            },
+          },
+        },
+        invitations: {
+          orderBy: { createdAt: 'desc' },
+        },
+        participations: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+  }
+
+  async count(): Promise<number> {
+    return await prisma.quiz.count();
+  }
+
   async findById(id: number): Promise<Quiz | null> {
     return await prisma.quiz.findUnique({
       where: { id },
       include: {
+        createur: {
+          select: {
+            id: true,
+            prenom: true,
+            nom: true,
+            email: true,
+          },
+        },
         questions: {
           orderBy: { ordre: 'asc' },
           include: {

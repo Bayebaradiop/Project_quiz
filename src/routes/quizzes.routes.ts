@@ -16,7 +16,7 @@ quizzesRoutes.post('/:quizId/questions', authMiddleware, questionController.crea
 quizzesRoutes.get('/:quizId/questions', questionController.getAllByQuizId);
 quizzesRoutes.get('/:quizId/questions/next-ordre', authMiddleware, questionController.getNextOrdre);
 
-quizzesRoutes.get('/:id', authMiddleware, quizController.getById);
+quizzesRoutes.get('/:id', quizController.getById); // Public mais avec restrictions
 quizzesRoutes.get('/:id/questions', quizController.getWithQuestions);
 quizzesRoutes.put('/:id', authMiddleware, quizController.update);
 quizzesRoutes.delete('/:id', authMiddleware, quizController.delete);

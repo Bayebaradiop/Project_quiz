@@ -4,6 +4,9 @@ import { createQuizSchema, updateQuizSchema } from '../validations/Quiz.validato
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../validations/erreurs_messages/Message.error';
 import { getUserFromContext } from '../middleware/Auth';
 import { ZodError } from 'zod';
+import { ApiResponse, ERROR_CODES } from '../dto/ApiResponse.dto';
+import { QuizMapper, QuizListDTO, QuizDetailDTO, QuizSummaryDTO } from '../dto/Quiz.dto';
+import { PaginationHelper } from '../utils/pagination.utils';
 
 export class QuizController {
   private quizService: QuizService;
@@ -47,17 +50,32 @@ export class QuizController {
 
   getAll = async (c: Context) => {
     try {
-      const quizzes = await this.quizService.getQuizzes();
+      // Extraire les paramètres de pagination
+      const searchParams = new URL(c.req.url).searchParams;
+      const paginationParams = PaginationHelper.extractParams(searchParams);
+      const { skip, take } = PaginationHelper.calculatePrismaParams(paginationParams);
 
-      return c.json({
-        success: true,
-        data: quizzes,
-      }, 200);
+      // Récupérer les quiz avec pagination
+      const { quizzes, total } = await this.quizService.getQuizzesWithPagination(skip, take);
+
+      // Convertir en DTOs
+      const quizzesDTO: QuizListDTO[] = quizzes.map((quiz: any) => QuizMapper.toListDTO(quiz));
+
+      // Créer les métadonnées de pagination
+      const pagination = PaginationHelper.createMeta(
+        paginationParams.page || 1,
+        paginationParams.limit || 10,
+        total
+      );
+
+      const response = ApiResponse.success(quizzesDTO, pagination);
+      return c.json(response, 200);
     } catch (error: any) {
-      return c.json({
-        success: false,
-        message: error.message || 'Erreur lors de la récupération des quiz',
-      }, 500);
+      const response = ApiResponse.error(
+        ERROR_CODES.INTERNAL_ERROR,
+        error.message || 'Erreur lors de la récupération des quiz'
+      );
+      return c.json(response, 500);
     }
   };
 
@@ -83,30 +101,28 @@ export class QuizController {
       const id = parseInt(c.req.param('id'));
 
       if (isNaN(id)) {
-        return c.json({
-          success: false,
-          message: 'ID invalide',
-        }, 400);
+        const response = ApiResponse.error(ERROR_CODES.VALIDATION_ERROR, 'ID invalide');
+        return c.json(response, 400);
       }
 
       const quiz = await this.quizService.getQuizById(id);
-
-      return c.json({
-        success: true,
-        data: quiz,
-      }, 200);
+      
+      // Vérifier si l'utilisateur est connecté
+      const user = c.get('user') as any || null;
+      const isCreator = user && user.userId === quiz.createur_id;
+      
+      // Utiliser le DTO approprié
+      const quizDTO = QuizMapper.toDetailDTO(quiz, isCreator);
+      
+      const response = ApiResponse.success(quizDTO);
+      return c.json(response, 200);
     } catch (error: any) {
       if (error.message === ERROR_MESSAGES.QUIZ_NOT_FOUND) {
-        return c.json({
-          success: false,
-          message: error.message,
-        }, 404);
+        const response = ApiResponse.error(ERROR_CODES.QUIZ_NOT_FOUND, error.message);
+        return c.json(response, 404);
       }
-
-      return c.json({
-        success: false,
-        message: error.message || 'Erreur lors de la récupération du quiz',
-      }, 500);
+      const response = ApiResponse.error(ERROR_CODES.INTERNAL_ERROR, error.message);
+      return c.json(response, 500);
     }
   };
 

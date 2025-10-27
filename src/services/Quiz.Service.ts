@@ -32,6 +32,14 @@ export class QuizService {
     return await this.quizRepository.findAll();
   }
 
+  async getQuizzesWithPagination(skip: number, take: number): Promise<{ quizzes: Quiz[]; total: number }> {
+    const [quizzes, total] = await Promise.all([
+      this.quizRepository.findAllPaginated(skip, take),
+      this.quizRepository.count(),
+    ]);
+    return { quizzes, total };
+  }
+
   async getQuizzesByCreateur(createur_id: number): Promise<Quiz[]> {
     return await this.quizRepository.findByCreateur(createur_id);
   }

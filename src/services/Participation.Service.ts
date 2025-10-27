@@ -216,10 +216,26 @@ export class ParticipationService {
       temps_total
     );
 
-    // Préparer le résultat
+    // Préparer le résultat SIMPLIFIÉ pour le participant
+    // Il doit voir uniquement: ses choix, si c'est correct ou pas, et le score
+    const reponsesSimplifiees = reponses.map((r: any) => ({
+      question_id: r.question_id,
+      texte_question: r.question?.texte || '',
+      votre_reponse: r.texte_reponse || (r.reponse ? r.reponse.texte : null),
+      est_correcte: r.est_correcte,
+      points_obtenus: r.points_obtenus,
+    }));
+
     const resultat: ResultatParticipation = {
-      participation: participationTerminee,
-      reponses,
+      participation: {
+        id: participationTerminee.id,
+        score: participationTerminee.score,
+        score_max: participationTerminee.score_max,
+        pourcentage: participationTerminee.pourcentage,
+        temps_total: participationTerminee.temps_total,
+        statut: participationTerminee.statut,
+      } as any,
+      reponses: reponsesSimplifiees as any,
       quiz: {
         id: quiz.id,
         titre: quiz.titre,
