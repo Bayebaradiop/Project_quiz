@@ -43,6 +43,7 @@ export interface QuizDetailDTO {
   duree_totale: number;
   createur: CreateurDTO; // Informations du créateur
   questions: QuestionDTO[];
+  participations?: any[]; // Tableau des participations (vide à la création)
   createdAt: string;
   updatedAt: string;
   // Statistiques (uniquement pour le créateur)
@@ -165,6 +166,7 @@ export class QuizMapper {
       duree_totale,
       createur, // ✨ Infos du créateur
       questions,
+      participations: Array.isArray(quiz.participations) ? quiz.participations : [], // ✨ Tableau des participations
       createdAt: quiz.createdAt.toISOString(),
       updatedAt: quiz.updatedAt.toISOString(),
     };

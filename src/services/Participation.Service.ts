@@ -74,7 +74,7 @@ export class ParticipationService {
     // Créer la participation
     const participation = await participationRepository.create({
       ...data,
-      utilisateur_id,
+      utilisateur_id: utilisateur_id || undefined,
     });
 
     return participation;
@@ -125,17 +125,14 @@ export class ParticipationService {
 
     // Vérifier que la participation est en cours
     if (participation.statut !== 'en_cours') {
-      throw new Error('Cette participation est déjà terminée');
+      throw new Error('Cette participation est déjà terminée ou abandonnée. Vous ne pouvez plus modifier vos réponses.');
     }
 
-    // Vérifier que la question n'a pas déjà été répondue
+    // Vérifier si une réponse existe déjà pour cette question
     const hasAnswered = await participationRepository.hasAnsweredQuestion(
       data.participation_id,
       data.question_id
     );
-    if (hasAnswered) {
-      throw new Error('Vous avez déjà répondu à cette question');
-    }
 
     // Récupérer la question avec les choix de réponses
     const question = await questionRepository.findById(data.question_id);
@@ -170,12 +167,24 @@ export class ParticipationService {
       points_obtenus = 1; // 1 point par bonne réponse
     }
 
-    // Enregistrer la réponse
-    await participationRepository.createReponse({
-      ...data,
-      est_correcte,
-      points_obtenus,
-    });
+    // Si une réponse existe déjà, la mettre à jour, sinon la créer
+    if (hasAnswered) {
+      await participationRepository.updateReponse({
+        participation_id: data.participation_id,
+        question_id: data.question_id,
+        ...(data.choix_reponse_id && { choix_reponse_id: data.choix_reponse_id }),
+        ...(data.texte_reponse && { texte_reponse: data.texte_reponse }),
+        ...(data.temps_reponse && { temps_reponse: data.temps_reponse }),
+        est_correcte,
+        points_obtenus,
+      });
+    } else {
+      await participationRepository.createReponse({
+        ...data,
+        est_correcte,
+        points_obtenus,
+      });
+    }
   }
 
   /**
@@ -198,7 +207,7 @@ export class ParticipationService {
 
     // Calculer le score
     const score = reponses.reduce((total: number, r: any) => total + r.points_obtenus, 0);
-    const quiz = participation.quiz as any;
+    const quiz = (participation as any).quiz;
     const score_max = quiz.questions.reduce((total: number, q: any) => total + (q.points || 1), 0);
     const pourcentage = score_max > 0 ? (score / score_max) * 100 : 0;
 

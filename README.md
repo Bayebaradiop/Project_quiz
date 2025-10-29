@@ -2,13 +2,35 @@
 
 API REST pour système de quiz avec questions à choix multiples (QCM).
 
+**📚 [INDEX DE LA DOCUMENTATION COMPLÈTE](./INDEX.md)** - Navigation par profil et sujet
+
 ---
 
 ## 📚 Documentation
 
+### 🎯 Pour Démarrer Rapidement
+
+1. **[GUIDE_TEST_COMPLET_POSTMAN.md](./GUIDE_TEST_COMPLET_POSTMAN.md)** ⭐ **PRINCIPAL**
+   - Guide complet de A à Z avec tous les endpoints
+   - Tests Postman détaillés (8 sections)
+   - Scénarios réels : Créateur, Participant avec/sans invitation, Modification de réponses
+   - Format : Body, Headers, Réponses attendues
+
+2. **[ENDPOINTS_SECURITY.md](./ENDPOINTS_SECURITY.md)** 🔒 **SÉCURITÉ**
+   - Liste complète : Endpoints publics vs protégés
+   - Règles d'authentification par endpoint
+   - Vérifications de sécurité (propriétaire, etc.)
+   - Recommandations d'implémentation
+
+3. **[FLUX_UTILISATEURS.md](./FLUX_UTILISATEURS.md)** 🚶 **PARCOURS UX**
+   - Flux A : Participant anonyme (sans compte)
+   - Flux B : Créateur de quiz (avec compte)
+   - Flux C : Conversion anonyme → créateur
+   - Diagrammes visuels et métriques
+
 ### Pour l'équipe Frontend 👨‍💻
 
-📖 **[README_FRONTEND_DEV.md](./README_FRONTEND_DEV.md)** - Guide principal pour l'intégration frontend
+📖 **[README_FRONTEND_DEV.md](./README_FRONTEND_DEV.md)** - Guide d'intégration frontend
 
 Ce fichier contient :
 - Vue d'ensemble de l'API
@@ -17,23 +39,19 @@ Ce fichier contient :
 - Recommandations UX/UI
 - Checklist d'intégration
 
-### Documentation détaillée
+### Documentation technique
 
-1. **[GUIDE_TESTS_COMPLET.md](./GUIDE_TESTS_COMPLET.md)** ⭐ **PRINCIPAL**
-   - Tous les endpoints avec exemples complets
-   - Tests Postman détaillés
-   - 2 scénarios complets (invitation + public)
-   - Format clair : Body, Headers, Réponses
+1. **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)**
+   - Documentation technique de l'architecture
+   - Structure des tables (Prisma)
+   - Relations entre entités
 
 2. **[tests/QuizLab_Postman_Collection.json](./tests/QuizLab_Postman_Collection.json)**
    - Collection Postman prête à l'emploi
    - Tests automatisés avec assertions
 
-3. **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)**
-   - Documentation technique de l'architecture
-
-4. **[POSTMAN_TESTS.md](./POSTMAN_TESTS.md)**
-   - Tests de base (référence vers GUIDE_TESTS_COMPLET.md)
+3. **[POSTMAN_TESTS.md](./POSTMAN_TESTS.md)**
+   - Tests de base (référence vers GUIDE_TEST_COMPLET_POSTMAN.md)
 
 ---
 

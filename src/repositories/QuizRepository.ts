@@ -18,7 +18,22 @@ export class QuizRepository {
         description: data.description ?? null,
       },
       include: {
-        questions: true,
+        createur: {
+          select: {
+            id: true,
+            prenom: true,
+            nom: true,
+            email: true,
+          },
+        },
+        questions: {
+          orderBy: { ordre: 'asc' },
+          include: {
+            choix_reponses: {
+              orderBy: { ordre: 'asc' },
+            },
+          },
+        },
         invitations: true,
         participations: true,
       },

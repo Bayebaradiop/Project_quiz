@@ -30,9 +30,9 @@ export interface ReponseParticipant {
 
 export interface DemarrerParticipationInput {
   quiz_id: number;
-  code_acces?: string | undefined; // Pour quiz privé avec invitation
-  email_participant?: string | undefined; // Pour anonyme
-  nom_participant?: string | undefined; // Pour anonyme
+  code_acces?: string; // Pour quiz privé avec invitation
+  email_participant?: string; // Pour anonyme
+  nom_participant?: string; // Pour anonyme
 }
 
 export interface SoumettreReponseInput {

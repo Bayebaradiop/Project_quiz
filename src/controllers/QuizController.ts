@@ -24,10 +24,13 @@ export class QuizController {
 
       const quiz = await this.quizService.createQuiz(validatedData, utilisateur.userId);
 
+      // Formater avec DTO (isCreator = true car c'est le créateur qui vient de créer)
+      const quizDTO = QuizMapper.toDetailDTO(quiz, true);
+
       return c.json({
         success: true,
         message: SUCCESS_MESSAGES.QUIZ_CREATED,
-        data: quiz,
+        data: quizDTO,
       }, 201);
     } catch (error: any) {
       if (error instanceof ZodError) {
@@ -84,9 +87,29 @@ export class QuizController {
       const utilisateur = getUserFromContext(c);
       const quizzes = await this.quizService.getQuizzesByCreateur(utilisateur.userId);
 
+      // Convertir en DTOs avec questions et participations
+      const quizzesDTO = quizzes.map((quiz: any) => {
+        const questions = Array.isArray(quiz.questions)
+          ? quiz.questions.map((q: any) => QuizMapper['toQuestionDTO'](q))
+          : [];
+        
+        const participations = Array.isArray(quiz.participations) ? quiz.participations : [];
+
+        return {
+          id: quiz.id,
+          titre: quiz.titre,
+          statut: quiz.statut,
+          nb_questions: questions.length,
+          nb_participations: participations.length,
+          questions, // ✨ Tableau des questions (vide si aucune)
+          participations, // ✨ Tableau des participations (vide si aucune)
+          createdAt: quiz.createdAt.toISOString(),
+        };
+      });
+
       return c.json({
         success: true,
-        data: quizzes,
+        data: quizzesDTO,
       }, 200);
     } catch (error: any) {
       return c.json({

@@ -8,6 +8,7 @@ import questionsRoutes from './routes/questions.routes';
 import reponsesRoutes from './routes/reponses.routes';
 import { invitationRoutes } from './routes/invitations.routes';
 import { participationRoutes } from './routes/participations.routes';
+import { createSwaggerRoutes } from './config/swagger.simple';
 
 validateEnv();
 
@@ -29,8 +30,15 @@ app.get('/', (c) => {
     message: 'QuizLab API',
     version: '1.0.0',
     status: 'running',
+    documentation: {
+      swagger: 'http://localhost:3000/api-docs',
+      postman: 'https://github.com/Bayebaradiop/Project_quiz/blob/feature/api-standardization/GUIDE_TEST_COMPLET_POSTMAN.md',
+    },
   });
 });
+
+// Documentation Swagger
+createSwaggerRoutes(app);
 
 app.route('/api/v1/utilisateurs', utilisateursRoutes);
 app.route('/api/v1/quizzes', quizzesRoutes);

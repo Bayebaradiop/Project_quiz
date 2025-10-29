@@ -181,6 +181,33 @@ export class ParticipationRepository {
   }
 
   /**
+   * Mettre à jour une réponse existante (permet la modification avant la fin du quiz)
+   */
+  async updateReponse(data: {
+    participation_id: number;
+    question_id: number;
+    choix_reponse_id?: number;
+    texte_reponse?: string;
+    temps_reponse?: number;
+    est_correcte: boolean;
+    points_obtenus: number;
+  }): Promise<ReponseParticipant> {
+    return await prisma.reponseParticipant.updateMany({
+      where: {
+        participation_id: data.participation_id,
+        question_id: data.question_id,
+      },
+      data: {
+        choix_reponse_id: data.choix_reponse_id ?? null,
+        texte_reponse: data.texte_reponse ?? null,
+        est_correcte: data.est_correcte,
+        points_obtenus: data.points_obtenus,
+        temps_reponse: data.temps_reponse ?? null,
+      },
+    }) as any;
+  }
+
+  /**
    * Trouver les réponses d'une participation
    */
   async findReponsesByParticipationId(participation_id: number): Promise<ReponseParticipant[]> {
