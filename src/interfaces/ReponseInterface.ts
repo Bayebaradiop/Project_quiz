@@ -1,22 +1,26 @@
+
 export interface Reponse {
   id: number;
   question_id: number;
-  texte_reponse: string;
+  utilisateur_id: number;
+  reponse_donnee: string;
   est_correcte: boolean;
-  ordre: number | null;
+  temps_reponse: number | null;
   createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
 }
+
 
 export interface CreateReponseInput {
-  texte_reponse: string;
+  question_id: number;
+  utilisateur_id: number;
+  reponse_donnee: string;
   est_correcte?: boolean;
-  ordre?: number | null;
+  temps_reponse?: number | null;
 }
 
+
 export interface UpdateReponseInput {
-  texte_reponse?: string | null;
+  reponse_donnee?: string | null;
   est_correcte?: boolean | null;
-  ordre?: number | null;
+  temps_reponse?: number | null;
 }

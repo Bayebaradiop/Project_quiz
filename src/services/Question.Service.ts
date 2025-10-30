@@ -63,10 +63,8 @@ export class QuestionService {
     }
 
     const updateData: any = {};
-    if (data.texte_question !== undefined) updateData.texte_question = data.texte_question;
-    if (data.type_question !== undefined) updateData.type_question = data.type_question;
-    if (data.points !== undefined) updateData.points = data.points;
-    if (data.temps_limite !== undefined) updateData.temps_limite = data.temps_limite ?? null;
+    if (data.texte !== undefined) updateData.texte = data.texte;
+    if (data.duree !== undefined) updateData.duree = data.duree;
     if (data.ordre !== undefined) updateData.ordre = data.ordre;
 
     return await this.questionRepository.update(id, updateData);
@@ -89,7 +87,7 @@ export class QuestionService {
   }
 
   async getQuestionWithReponses(id: number) {
-    const question = await this.questionRepository.findWithReponses(id);
+    const question = await this.questionRepository.findById(id);
     if (!question) {
       throw new Error(ERROR_MESSAGES.QUESTION_NOT_FOUND);
     }
@@ -97,7 +95,6 @@ export class QuestionService {
   }
 
   async getNextOrdre(quiz_id: number): Promise<number> {
-    const maxOrdre = await this.questionRepository.getMaxOrdre(quiz_id);
-    return maxOrdre + 1;
+    return await this.questionRepository.getNextOrdre(quiz_id);
   }
 }

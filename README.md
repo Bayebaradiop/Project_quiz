@@ -10,19 +10,44 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
 
 ### 🎯 Pour Démarrer Rapidement
 
-1. **[GUIDE_TEST_COMPLET_POSTMAN.md](./GUIDE_TEST_COMPLET_POSTMAN.md)** ⭐ **PRINCIPAL**
+1. **[TEST_POSTMAN_COMPLET.md](./TEST_POSTMAN_COMPLET.md)** ⭐ **NOUVEAU - TESTS POSTMAN A-Z**
+   - Guide complet de test de l'application du début à la fin
+   - 45+ tests couvrant tous les endpoints
+   - Variables d'environnement automatiques
+   - Scénarios réels : Créateur, Participant, Invitations, Statistiques
+   - Collection Postman exportable
+
+2. **[GUIDE_FRONTEND.md](./GUIDE_FRONTEND.md)** ⭐ **NOUVEAU - GUIDE FRONTEND**
+   - API optimisée pour faciliter le travail frontend
+   - Zéro logique côté client (backend fait tout)
+   - Exemples de code prêts à l'emploi
+   - Cas d'usage complets avec réponses JSON
+
+3. **[SWAGGER_TEST_DATA.md](./SWAGGER_TEST_DATA.md)** ⭐ **TESTS SWAGGER**
+   - Comptes de test avec mots de passe réels (seeder)
+   - Exemples de données cohérents pour tous les endpoints
+   - 7 scénarios complets de bout en bout
+   - Interface interactive : http://localhost:3000/api-docs
+
+4. **[GUIDE_TEST_COMPLET_POSTMAN.md](./GUIDE_TEST_COMPLET_POSTMAN.md)** 📘 **TESTS POSTMAN (ANCIEN)**
    - Guide complet de A à Z avec tous les endpoints
    - Tests Postman détaillés (8 sections)
-   - Scénarios réels : Créateur, Participant avec/sans invitation, Modification de réponses
+   - Scénarios réels : Créateur, Participant avec/sans invitation
    - Format : Body, Headers, Réponses attendues
 
-2. **[ENDPOINTS_SECURITY.md](./ENDPOINTS_SECURITY.md)** 🔒 **SÉCURITÉ**
+5. **[SWAGGER_GUIDE.md](./SWAGGER_GUIDE.md)** 📘 **DOCUMENTATION SWAGGER**
+   - Interface interactive Swagger UI
+   - Comptes de test disponibles
+   - Contraintes de validation détaillées
+   - Codes d'erreur HTTP complets
+
+6. **[ENDPOINTS_SECURITY.md](./ENDPOINTS_SECURITY.md)** 🔒 **SÉCURITÉ**
    - Liste complète : Endpoints publics vs protégés
    - Règles d'authentification par endpoint
    - Vérifications de sécurité (propriétaire, etc.)
    - Recommandations d'implémentation
 
-3. **[FLUX_UTILISATEURS.md](./FLUX_UTILISATEURS.md)** 🚶 **PARCOURS UX**
+7. **[FLUX_UTILISATEURS.md](./FLUX_UTILISATEURS.md)** 🚶 **PARCOURS UX**
    - Flux A : Participant anonyme (sans compte)
    - Flux B : Créateur de quiz (avec compte)
    - Flux C : Conversion anonyme → créateur
@@ -30,12 +55,14 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
 
 ### Pour l'équipe Frontend 👨‍💻
 
-📖 **[README_FRONTEND_DEV.md](./README_FRONTEND_DEV.md)** - Guide d'intégration frontend
+📖 **[GUIDE_FRONTEND.md](./GUIDE_FRONTEND.md)** - Guide complet d'intégration frontend
+📖 **[README_FRONTEND_DEV.md](./README_FRONTEND_DEV.md)** - Guide d'intégration (ancien)
 
-Ce fichier contient :
+Ces fichiers contiennent :
 - Vue d'ensemble de l'API
 - Liens vers toute la documentation
 - Exemples de code React/TypeScript
+- API optimisée : Backend fait tout le travail
 - Recommandations UX/UI
 - Checklist d'intégration
 

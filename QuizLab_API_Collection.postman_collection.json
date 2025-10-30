@@ -1,0 +1,709 @@
+{
+	"info": {
+		"name": "QuizLab API - HashIds Sécurisés",
+		"description": "Collection complète pour tester l'API QuizLab avec HashIds automatiques.\n\n**🔒 SÉCURITÉ**: Tous les IDs sont automatiquement encodés en hashs côté backend.\n\n**✅ AUCUNE logique requise côté frontend** - Les hashs sont gérés automatiquement!",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "quizId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "questionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "choixId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "participationId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "invitationId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "codeAcces",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. UTILISATEURS",
+			"item": [
+				{
+					"name": "1.1 Inscription",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"User created successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.utilisateur).to.have.property('id');",
+									"    ",
+									"    // Sauvegarder l'ID encodé (HASH automatique!)",
+									"    pm.collectionVariables.set(\"userId\", jsonData.utilisateur.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"prenom\": \"Jean\",\n  \"nom\": \"Dupont\",\n  \"email\": \"jean.dupont@example.com\",\n  \"password\": \"Test@123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/utilisateurs/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["utilisateurs", "register"]
+						},
+						"description": "Créer un nouveau compte utilisateur.\n\n✅ L'ID retourné est automatiquement un HASH!"
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Connexion",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Login successful\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.utilisateur).to.have.property('id');",
+									"    ",
+									"    // Le cookie httpOnly est automatiquement sauvegardé",
+									"    console.log(\"✅ Token stocké dans cookie httpOnly\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"jean.dupont@example.com\",\n  \"password\": \"Test@123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/utilisateurs/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["utilisateurs", "login"]
+						},
+						"description": "Se connecter avec email et mot de passe.\n\n🔒 Le token JWT est stocké dans un cookie httpOnly (sécurisé)."
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Profil utilisateur",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"User profile returned with HASH ID\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.utilisateur.id).to.be.a('string');",
+									"    ",
+									"    console.log(\"✅ User ID (HASH): \" + jsonData.utilisateur.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/utilisateurs/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["utilisateurs", "{{userId}}"]
+						},
+						"description": "Récupérer le profil d'un utilisateur par son ID (hash).\n\n✅ L'ID dans l'URL est automatiquement décodé par le backend!"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour la gestion des utilisateurs"
+		},
+		{
+			"name": "2. QUIZ",
+			"item": [
+				{
+					"name": "2.1 Créer un quiz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Quiz created with encoded IDs\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    ",
+									"    // Tous les IDs sont automatiquement encodés en HASH!",
+									"    pm.collectionVariables.set(\"quizId\", jsonData.data.id);",
+									"    ",
+									"    console.log(\"✅ Quiz ID (HASH): \" + jsonData.data.id);",
+									"    console.log(\"✅ Createur ID (HASH): \" + jsonData.data.createur.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"titre\": \"Quiz de Mathématiques\",\n  \"description\": \"Test vos connaissances en mathématiques\",\n  \"categorie\": \"Mathématiques\",\n  \"type_quiz\": \"instantane\",\n  \"niveau_difficulte\": \"moyen\",\n  \"duree_minutes\": 15,\n  \"score_minimum\": 60,\n  \"est_public\": true,\n  \"questions\": [\n    {\n      \"texte\": \"Combien font 5 + 3 ?\",\n      \"duree\": 30,\n      \"ordre\": 1,\n      \"choix_reponses\": [\n        {\"texte\": \"7\", \"est_correcte\": false, \"ordre\": 1},\n        {\"texte\": \"8\", \"est_correcte\": true, \"ordre\": 2},\n        {\"texte\": \"9\", \"est_correcte\": false, \"ordre\": 3}\n      ]\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/quizzes",
+							"host": ["{{baseUrl}}"],
+							"path": ["quizzes"]
+						},
+						"description": "Créer un nouveau quiz avec questions.\n\n✅ Tous les IDs retournés sont automatiquement encodés!"
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 Liste des quiz publics (sans auth)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Quiz list with encoded IDs\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    ",
+									"    if (jsonData.data.quizzes && jsonData.data.quizzes.length > 0) {",
+									"        var quiz = jsonData.data.quizzes[0];",
+									"        pm.expect(quiz.id).to.be.a('string');",
+									"        ",
+									"        console.log(\"✅ Quiz ID (HASH): \" + quiz.id);",
+									"        pm.collectionVariables.set(\"quizId\", quiz.id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/quizzes",
+							"host": ["{{baseUrl}}"],
+							"path": ["quizzes"]
+						},
+						"description": "Récupérer la liste des quiz publics (sans authentification).\n\n✅ Tous les IDs sont automatiquement encodés!"
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 Détails d'un quiz (avec HASH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Quiz details with all IDs encoded\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    ",
+									"    // Tous les IDs sont des HASH!",
+									"    console.log(\"✅ Quiz ID: \" + jsonData.data.id);",
+									"    console.log(\"✅ Createur ID: \" + jsonData.data.createur.id);",
+									"    ",
+									"    if (jsonData.data.questions && jsonData.data.questions.length > 0) {",
+									"        var question = jsonData.data.questions[0];",
+									"        pm.collectionVariables.set(\"questionId\", question.id);",
+									"        ",
+									"        if (question.choix && question.choix.length > 0) {",
+									"            pm.collectionVariables.set(\"choixId\", question.choix[0].id);",
+									"            console.log(\"✅ Question ID: \" + question.id);",
+									"            console.log(\"✅ Choix ID: \" + question.choix[0].id);",
+									"        }",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/quizzes/{{quizId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["quizzes", "{{quizId}}"]
+						},
+						"description": "Récupérer les détails d'un quiz par son ID (hash).\n\n✅ Le HASH est automatiquement décodé en ID numérique par le backend!"
+					},
+					"response": []
+				},
+				{
+					"name": "2.4 Modifier un quiz (avec HASH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Quiz updated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.statut).to.eql('publie');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"statut\": \"publie\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/quizzes/{{quizId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["quizzes", "{{quizId}}"]
+						},
+						"description": "Modifier un quiz en utilisant son HASH.\n\n✅ Le backend décode automatiquement le HASH!"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour la gestion des quiz"
+		},
+		{
+			"name": "3. INVITATIONS",
+			"item": [
+				{
+					"name": "3.1 Créer une invitation (avec HASH quiz)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Invitation created with encoded IDs\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    ",
+									"    // Sauvegarder l'ID encodé et le code d'accès",
+									"    pm.collectionVariables.set(\"invitationId\", jsonData.data.id);",
+									"    pm.collectionVariables.set(\"codeAcces\", jsonData.data.code_acces);",
+									"    ",
+									"    console.log(\"✅ Invitation ID (HASH): \" + jsonData.data.id);",
+									"    console.log(\"✅ Quiz ID (HASH): \" + jsonData.data.quiz_id);",
+									"    console.log(\"✅ Code d'accès: \" + jsonData.data.code_acces);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"invite@example.com\",\n  \"nom\": \"Martin\",\n  \"prenom\": \"Pierre\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/invitations/quizzes/{{quizId}}/invitations",
+							"host": ["{{baseUrl}}"],
+							"path": ["invitations", "quizzes", "{{quizId}}", "invitations"]
+						},
+						"description": "Créer une invitation pour un quiz en utilisant le HASH du quiz.\n\n✅ Le HASH est automatiquement décodé!"
+					},
+					"response": []
+				},
+				{
+					"name": "3.2 Valider une invitation (sans auth)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Invitation validated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('quiz_id');",
+									"    ",
+									"    console.log(\"✅ Quiz ID (HASH): \" + jsonData.data.quiz_id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code_acces\": \"{{codeAcces}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/invitations/validate",
+							"host": ["{{baseUrl}}"],
+							"path": ["invitations", "validate"]
+						},
+						"description": "Valider un code d'invitation (sans authentification).\n\n✅ Retourne le HASH du quiz!"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour la gestion des invitations"
+		},
+		{
+			"name": "4. PARTICIPATIONS",
+			"item": [
+				{
+					"name": "4.1 Démarrer participation quiz public",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Participation started with encoded IDs\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    ",
+									"    // Tous les IDs retournés sont des HASH!",
+									"    pm.collectionVariables.set(\"participationId\", jsonData.data.participation.id);",
+									"    ",
+									"    console.log(\"✅ Participation ID (HASH): \" + jsonData.data.participation.id);",
+									"    console.log(\"✅ Quiz ID (HASH): \" + jsonData.data.participation.quiz_id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"participant@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/participations/quiz/{{quizId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["participations", "quiz", "{{quizId}}"]
+						},
+						"description": "Démarrer une participation à un quiz public.\n\n✅ Le HASH du quiz est décodé automatiquement!\n✅ Tous les IDs retournés sont encodés!"
+					},
+					"response": []
+				},
+				{
+					"name": "4.2 Soumettre une réponse (HASH dans URL ET body!)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Answer submitted successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    ",
+									"    console.log(\"✅ Réponse enregistrée avec le HASH!\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reponse_id\": \"{{choixId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/participations/{{participationId}}/questions/{{questionId}}/reponse",
+							"host": ["{{baseUrl}}"],
+							"path": ["participations", "{{participationId}}", "questions", "{{questionId}}", "reponse"]
+						},
+						"description": "Soumettre une réponse à une question.\n\n🎉 **MAGIC!** Le frontend envoie le HASH directement:\n- HASH dans l'URL (participation, question)\n- HASH dans le body (reponse_id)\n\n✅ Le backend décode tout automatiquement!"
+					},
+					"response": []
+				},
+				{
+					"name": "4.3 Terminer une participation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Participation finished with results\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.participation).to.have.property('score');",
+									"    pm.expect(jsonData.data.participation).to.have.property('pourcentage');",
+									"    ",
+									"    console.log(\"✅ Score: \" + jsonData.data.participation.score);",
+									"    console.log(\"✅ Pourcentage: \" + jsonData.data.participation.pourcentage + \"%\");",
+									"    console.log(\"✅ Participation ID (HASH): \" + jsonData.data.participation.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/participations/{{participationId}}/terminer",
+							"host": ["{{baseUrl}}"],
+							"path": ["participations", "{{participationId}}", "terminer"]
+						},
+						"description": "Terminer une participation et obtenir les résultats.\n\n✅ Le HASH est décodé automatiquement!\n✅ Tous les IDs dans les résultats sont encodés!"
+					},
+					"response": []
+				},
+				{
+					"name": "4.4 Récupérer les résultats",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Results with all IDs encoded\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    ",
+									"    console.log(\"✅ Participation ID (HASH): \" + jsonData.data.id);",
+									"    console.log(\"✅ Quiz ID (HASH): \" + jsonData.data.quiz_id);",
+									"    ",
+									"    if (jsonData.data.reponses && jsonData.data.reponses.length > 0) {",
+									"        console.log(\"✅ Question ID (HASH): \" + jsonData.data.reponses[0].question_id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/participations/{{participationId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["participations", "{{participationId}}"]
+						},
+						"description": "Récupérer les résultats d'une participation.\n\n✅ Tous les IDs sont automatiquement encodés!"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints pour les participations aux quiz"
+		},
+		{
+			"name": "5. PARTICIPATION VIA INVITATION",
+			"item": [
+				{
+					"name": "5.1 Démarrer avec code d'invitation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Participation via invitation started\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    ",
+									"    console.log(\"✅ Participation ID (HASH): \" + jsonData.data.id);",
+									"    console.log(\"✅ Quiz ID récupéré depuis invitation (HASH): \" + jsonData.data.quiz_id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code_acces\": \"{{codeAcces}}\",\n  \"email_participant\": \"invite.participant@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/participations",
+							"host": ["{{baseUrl}}"],
+							"path": ["participations"]
+						},
+						"description": "Démarrer une participation avec un code d'invitation.\n\n✅ Le backend récupère automatiquement le quiz_id depuis l'invitation!"
+					},
+					"response": []
+				}
+			],
+			"description": "Participation via code d'invitation"
+		}
+	],
+	"auth": {
+		"type": "noauth"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

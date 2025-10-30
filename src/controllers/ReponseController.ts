@@ -25,9 +25,19 @@ export class ReponseController {
         }, 400);
       }
 
+
       const validatedData = createReponseSchema.parse(body);
 
-      const reponse = await this.reponseService.createReponse(question_id, validatedData, utilisateur.userId);
+      // Transformation pour compatibilité avec le service
+      const reponseInput = {
+        question_id,
+        utilisateur_id: utilisateur.userId,
+        reponse_donnee: validatedData.texte_reponse,
+        est_correcte: validatedData.est_correcte ?? false,
+        temps_reponse: null,
+      };
+
+      const reponse = await this.reponseService.createReponse(question_id, reponseInput, utilisateur.userId);
 
       return c.json({
         success: true,

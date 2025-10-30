@@ -1,3 +1,4 @@
+
 import { PrismaClient } from '@prisma/client';
 import { Reponse } from '../interfaces/ReponseInterface';
 
@@ -6,23 +7,22 @@ const prisma = new PrismaClient();
 export class ReponseRepository {
   async create(data: {
     question_id: number;
-    texte_reponse: string;
+    utilisateur_id: number;
+    reponse_donnee: string;
     est_correcte?: boolean;
-    ordre?: number | null;
+    temps_reponse?: number | null;
   }): Promise<Reponse> {
     return await prisma.reponse.create({
       data: {
         ...data,
         est_correcte: data.est_correcte ?? false,
-        ordre: data.ordre ?? null,
+        temps_reponse: data.temps_reponse ?? null,
       },
     });
   }
 
   async findAll(): Promise<Reponse[]> {
-    return await prisma.reponse.findMany({
-      orderBy: { ordre: 'asc' },
-    });
+    return await prisma.reponse.findMany();
   }
 
   async findById(id: number): Promise<Reponse | null> {
@@ -34,22 +34,21 @@ export class ReponseRepository {
   async findByQuestionId(question_id: number): Promise<Reponse[]> {
     return await prisma.reponse.findMany({
       where: { question_id },
-      orderBy: { ordre: 'asc' },
     });
   }
 
   async update(
     id: number,
     data: {
-      texte_reponse?: string | null;
+      reponse_donnee?: string | null;
       est_correcte?: boolean | null;
-      ordre?: number | null;
+      temps_reponse?: number | null;
     }
   ): Promise<Reponse> {
     const updateData: any = {};
-    if (data.texte_reponse !== undefined) updateData.texte_reponse = data.texte_reponse;
+    if (data.reponse_donnee !== undefined) updateData.reponse_donnee = data.reponse_donnee;
     if (data.est_correcte !== undefined) updateData.est_correcte = data.est_correcte;
-    if (data.ordre !== undefined) updateData.ordre = data.ordre ?? null;
+    if (data.temps_reponse !== undefined) updateData.temps_reponse = data.temps_reponse;
 
     return await prisma.reponse.update({
       where: { id },
@@ -70,13 +69,5 @@ export class ReponseRepository {
         est_correcte: true,
       },
     });
-  }
-
-  async getMaxOrdre(question_id: number): Promise<number> {
-    const result = await prisma.reponse.aggregate({
-      where: { question_id },
-      _max: { ordre: true },
-    });
-    return result._max.ordre ?? 0;
   }
 }

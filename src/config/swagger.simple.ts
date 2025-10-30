@@ -15,12 +15,26 @@ export const createSwaggerRoutes = (app: Hono) => {
         description: `
 API REST pour système de quiz avec questions à choix multiples (QCM).
 
-## 🔒 Authentification
+## Authentification
 
-- **Endpoints PUBLICS ✅** : Inscription, Connexion, Participations
-- **Endpoints PROTÉGÉS 🔒** : Gestion Quiz, Questions, Invitations, Statistiques
+- **Endpoints PUBLICS** : Inscription, Connexion, Participations
+- **Endpoints PROTÉGÉS** : Gestion Quiz, Questions, Invitations, Statistiques
 
-## 📚 Documentation
+## Comptes de test disponibles
+
+Utilisez ces comptes pour tester l'API :
+
+**Utilisateur Normal (Créateur de quiz) :**
+- Email: user@quizlab.com
+- Password: User@1234
+- Rôle: user (peut créer et gérer des quiz)
+
+**Administrateur :**
+- Email: admin@quizlab.com
+- Password: Admin@1234
+- Rôle: admin (accès complet)
+
+## Documentation
 
 - [Guide Complet](https://github.com/Bayebaradiop/Project_quiz/blob/feature/api-standardization/GUIDE_TEST_COMPLET_POSTMAN.md)
 - [Sécurité](https://github.com/Bayebaradiop/Project_quiz/blob/feature/api-standardization/ENDPOINTS_SECURITY.md)
@@ -62,21 +76,21 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                         type: 'string', 
                         minLength: 2,
                         maxLength: 50,
-                        example: 'Dupont',
+                        example: 'Dubois',
                         description: 'Nom de famille (2-50 caractères)'
                       },
                       prenom: { 
                         type: 'string', 
                         minLength: 2,
                         maxLength: 50,
-                        example: 'Jean',
+                        example: 'Marie',
                         description: 'Prénom (2-50 caractères)'
                       },
                       email: { 
                         type: 'string', 
                         format: 'email', 
                         maxLength: 255,
-                        example: 'jean.dupont@example.com',
+                        example: 'marie.dubois@example.com',
                         description: 'Adresse email valide (max 255 caractères)'
                       },
                       password: { 
@@ -84,7 +98,7 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                         format: 'password', 
                         minLength: 8,
                         maxLength: 100,
-                        example: 'SecurePass@123',
+                        example: 'Marie@1234',
                         description: 'Mot de passe (8-100 caractères) contenant au moins: 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial'
                       },
                     },
@@ -105,10 +119,10 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                         data: {
                           type: 'object',
                           properties: {
-                            id: { type: 'number', example: 5 },
-                            nom: { type: 'string', example: 'Dupont' },
-                            prenom: { type: 'string', example: 'Jean' },
-                            email: { type: 'string', example: 'jean.dupont@example.com' },
+                            id: { type: 'number', example: 3 },
+                            nom: { type: 'string', example: 'Dubois' },
+                            prenom: { type: 'string', example: 'Marie' },
+                            email: { type: 'string', example: 'marie.dubois@example.com' },
                           },
                         },
                       },
@@ -198,14 +212,14 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                         type: 'string', 
                         format: 'email', 
                         maxLength: 255,
-                        example: 'jean.dupont@example.com',
-                        description: 'Adresse email valide'
+                        example: 'user@quizlab.com',
+                        description: 'Adresse email valide (Testez avec: user@quizlab.com)'
                       },
                       password: { 
                         type: 'string', 
                         format: 'password', 
-                        example: 'SecurePass@123',
-                        description: 'Mot de passe'
+                        example: 'User@1234',
+                        description: 'Mot de passe (Testez avec: User@1234)'
                       },
                     },
                   },
@@ -231,10 +245,11 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                         data: {
                           type: 'object',
                           properties: {
-                            id: { type: 'number', example: 5 },
+                            id: { type: 'number', example: 2 },
                             nom: { type: 'string', example: 'Dupont' },
                             prenom: { type: 'string', example: 'Jean' },
-                            email: { type: 'string', example: 'jean.dupont@example.com' },
+                            email: { type: 'string', example: 'user@quizlab.com' },
+                            role: { type: 'string', example: 'user' }
                           },
                         },
                       },
@@ -319,13 +334,13 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                         type: 'string', 
                         minLength: 3,
                         maxLength: 200,
-                        example: 'Quiz JavaScript Avancé',
+                        example: 'Quiz de Culture Générale 2025',
                         description: 'Titre du quiz (3-200 caractères)'
                       },
                       description: { 
                         type: 'string', 
                         maxLength: 1000,
-                        example: 'Testez vos connaissances en JavaScript',
+                        example: 'Testez vos connaissances sur l\'actualité, l\'histoire et la géographie mondiale',
                         description: 'Description optionnelle (max 1000 caractères)'
                       },
                       type_quiz: { 
@@ -359,9 +374,12 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                           type: 'object',
                           properties: {
                             id: { type: 'number', example: 1 },
-                            titre: { type: 'string', example: 'Quiz JavaScript Avancé' },
+                            titre: { type: 'string', example: 'Quiz de Culture Générale 2025' },
+                            description: { type: 'string', example: 'Testez vos connaissances sur l\'actualité, l\'histoire et la géographie mondiale' },
                             type_quiz: { type: 'string', example: 'instantane' },
-                            statut: { type: 'string', example: 'brouillon' }
+                            statut: { type: 'string', example: 'brouillon' },
+                            createur_id: { type: 'number', example: 2 },
+                            date_creation: { type: 'string', format: 'date-time', example: '2025-10-29T10:30:00Z' }
                           }
                         }
                       }
@@ -416,12 +434,26 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
           },
           get: {
             tags: ['Quiz'],
-            summary: 'Liste des quiz (Protégé)',
-            description: 'Obtenir tous les quiz avec pagination',
-            security: [{ cookieAuth: [] }],
+            summary: 'Liste des quiz (Public ✅ - Comportement intelligent)',
+            description: `
+**Comportement adaptatif selon l'authentification :**
+
+**1. UTILISATEUR NON CONNECTÉ (Public) :**
+- Retourne tous les quiz PUBLIÉS avec questions et créateur
+- Les réponses correctes sont CACHÉES (est_correcte non inclus)
+- Parfait pour participants qui veulent passer un quiz
+
+**2. UTILISATEUR CONNECTÉ (Authentifié) :**
+- Retourne SES PROPRES QUIZ avec statistiques complètes
+- Inclut questions, participations, invitations
+- Les réponses correctes sont VISIBLES
+- Parfait pour dashboard créateur
+
+Le backend détecte automatiquement l'authentification via le cookie de session.
+            `,
             parameters: [
-              { name: 'page', in: 'query', schema: { type: 'integer', default: 1, minimum: 1 }, description: 'Numéro de page' },
-              { name: 'limit', in: 'query', schema: { type: 'integer', default: 10, minimum: 1, maximum: 100 }, description: 'Nombre d\'éléments par page (max 100)' },
+              { name: 'page', in: 'query', schema: { type: 'integer', default: 1, minimum: 1 }, description: 'Numéro de page (uniquement pour mode public)' },
+              { name: 'limit', in: 'query', schema: { type: 'integer', default: 10, minimum: 1, maximum: 100 }, description: 'Nombre d\'éléments par page (uniquement pour mode public)' },
             ],
             responses: {
               '200': { 
@@ -494,14 +526,14 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                     properties: {
                       quiz_id: { 
                         type: 'number', 
-                        example: 8,
-                        description: 'ID du quiz à démarrer'
+                        example: 1,
+                        description: 'ID du quiz à démarrer (utilisez 1 pour tester avec un quiz existant)'
                       },
                       email_participant: { 
                         type: 'string', 
                         format: 'email',
                         maxLength: 255,
-                        example: 'participant@example.com',
+                        example: 'sophie.martin@example.com',
                         description: 'Email du participant (max 255 caractères)'
                       },
                       nom_participant: { 
@@ -534,11 +566,12 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                         data: {
                           type: 'object',
                           properties: {
-                            id: { type: 'number', example: 14 },
-                            quiz_id: { type: 'number', example: 8 },
+                            id: { type: 'number', example: 1 },
+                            quiz_id: { type: 'number', example: 1 },
                             statut: { type: 'string', example: 'en_cours' },
-                            email_participant: { type: 'string', example: 'participant@example.com' },
-                            nom_participant: { type: 'string', example: 'Sophie Martin' }
+                            email_participant: { type: 'string', example: 'sophie.martin@example.com' },
+                            nom_participant: { type: 'string', example: 'Sophie Martin' },
+                            date_debut: { type: 'string', format: 'date-time', example: '2025-10-29T14:30:00Z' }
                           },
                         },
                       },
@@ -621,23 +654,23 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                     properties: {
                       participation_id: { 
                         type: 'number', 
-                        example: 14,
-                        description: 'ID de la participation en cours'
+                        example: 1,
+                        description: 'ID de la participation en cours (utilisez 1 après avoir démarré une participation)'
                       },
                       question_id: { 
                         type: 'number', 
-                        example: 19,
-                        description: 'ID de la question'
+                        example: 1,
+                        description: 'ID de la question (première question du quiz)'
                       },
                       choix_reponse_id: { 
                         type: 'number', 
-                        example: 68,
+                        example: 1,
                         description: 'ID du choix de réponse (pour QCM)'
                       },
                       texte_reponse: { 
                         type: 'string', 
                         maxLength: 1000,
-                        example: 'Ma réponse',
+                        example: 'Paris est la capitale de la France',
                         description: 'Texte de la réponse (pour questions ouvertes, max 1000 caractères)'
                       },
                       temps_reponse: { 
@@ -664,10 +697,12 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                         data: {
                           type: 'object',
                           properties: {
-                            id: { type: 'number', example: 45 },
-                            participation_id: { type: 'number', example: 14 },
-                            question_id: { type: 'number', example: 19 },
-                            est_correcte: { type: 'boolean', example: true }
+                            id: { type: 'number', example: 1 },
+                            participation_id: { type: 'number', example: 1 },
+                            question_id: { type: 'number', example: 1 },
+                            choix_reponse_id: { type: 'number', example: 1 },
+                            est_correcte: { type: 'boolean', example: true },
+                            temps_reponse: { type: 'number', example: 15 }
                           }
                         }
                       }
@@ -750,8 +785,8 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                     properties: {
                       participation_id: { 
                         type: 'number', 
-                        example: 14,
-                        description: 'ID de la participation à terminer'
+                        example: 1,
+                        description: 'ID de la participation à terminer (utilisez 1 après avoir répondu aux questions)'
                       },
                     },
                   },
@@ -774,13 +809,13 @@ API REST pour système de quiz avec questions à choix multiples (QCM).
                             participation: {
                               type: 'object',
                               properties: {
-                                id: { type: 'number', example: 14 },
-                                score: { type: 'number', example: 2 },
-                                score_max: { type: 'number', example: 2 },
-                                pourcentage: { type: 'number', example: 100 },
+                                id: { type: 'number', example: 1 },
+                                score: { type: 'number', example: 8 },
+                                score_max: { type: 'number', example: 10 },
+                                pourcentage: { type: 'number', example: 80 },
                                 statut: { type: 'string', example: 'termine' },
-                                date_debut: { type: 'string', format: 'date-time' },
-                                date_fin: { type: 'string', format: 'date-time' }
+                                date_debut: { type: 'string', format: 'date-time', example: '2025-10-29T14:30:00Z' },
+                                date_fin: { type: 'string', format: 'date-time', example: '2025-10-29T14:45:00Z' }
                               },
                             },
                           },

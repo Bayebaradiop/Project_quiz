@@ -71,3 +71,6 @@ export const updateQuestionSchema = z.object({
     .positive({ message: QUESTION_VALIDATION_MESSAGES.ORDRE_INVALID })
     .optional(),
 });
+
+export type CreateQuestionInput = z.infer<typeof createQuestionSchema>;
+export type UpdateQuestionInput = z.infer<typeof updateQuestionSchema>;

@@ -3,6 +3,7 @@ import { QuizService } from '../services/Quiz.Service';
 import { createQuizSchema, updateQuizSchema } from '../validations/Quiz.validator';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../validations/erreurs_messages/Message.error';
 import { getUserFromContext } from '../middleware/Auth';
+import { getNumericId } from '../middleware/HashId';
 import { ZodError } from 'zod';
 import { ApiResponse, ERROR_CODES } from '../dto/ApiResponse.dto';
 import { QuizMapper, QuizListDTO, QuizDetailDTO, QuizSummaryDTO } from '../dto/Quiz.dto';
@@ -51,6 +52,11 @@ export class QuizController {
     }
   };
 
+  /**
+   * GET /quizzes (PUBLIC - sans authentification requise)
+   * Retourne UNIQUEMENT les quiz publics publiés
+   * SANS informations sensibles (pas d'invitations, participations, bonnes réponses)
+   */
   getAll = async (c: Context) => {
     try {
       // Extraire les paramètres de pagination
@@ -58,11 +64,8 @@ export class QuizController {
       const paginationParams = PaginationHelper.extractParams(searchParams);
       const { skip, take } = PaginationHelper.calculatePrismaParams(paginationParams);
 
-      // Récupérer les quiz avec pagination
-      const { quizzes, total } = await this.quizService.getQuizzesWithPagination(skip, take);
-
-      // Convertir en DTOs
-      const quizzesDTO: QuizListDTO[] = quizzes.map((quiz: any) => QuizMapper.toListDTO(quiz));
+      // Récupérer UNIQUEMENT les quiz publics publiés (pour les participants)
+      const { quizzes, total } = await this.quizService.getQuizzesPublicWithQuestions(skip, take);
 
       // Créer les métadonnées de pagination
       const pagination = PaginationHelper.createMeta(
@@ -71,7 +74,10 @@ export class QuizController {
         total
       );
 
-      const response = ApiResponse.success(quizzesDTO, pagination);
+      const response = ApiResponse.success({
+        quizzes,
+        message: 'Liste publique des quiz disponibles'
+      }, pagination);
       return c.json(response, 200);
     } catch (error: any) {
       const response = ApiResponse.error(
@@ -82,48 +88,38 @@ export class QuizController {
     }
   };
 
+    /**
+   * GET /mes-quiz (PROTÉGÉ - authentification requise)
+   * Retourne TOUS les quiz du créateur connecté
+   * AVEC toutes les informations (invitations, participations, bonnes réponses)
+   */
   getAllByCreateur = async (c: Context) => {
     try {
       const utilisateur = getUserFromContext(c);
       const quizzes = await this.quizService.getQuizzesByCreateur(utilisateur.userId);
 
-      // Convertir en DTOs avec questions et participations
-      const quizzesDTO = quizzes.map((quiz: any) => {
-        const questions = Array.isArray(quiz.questions)
-          ? quiz.questions.map((q: any) => QuizMapper['toQuestionDTO'](q))
-          : [];
-        
-        const participations = Array.isArray(quiz.participations) ? quiz.participations : [];
-
-        return {
-          id: quiz.id,
-          titre: quiz.titre,
-          statut: quiz.statut,
-          nb_questions: questions.length,
-          nb_participations: participations.length,
-          questions, // ✨ Tableau des questions (vide si aucune)
-          participations, // ✨ Tableau des participations (vide si aucune)
-          createdAt: quiz.createdAt.toISOString(),
-        };
+      // Retourner TOUTES les informations (y compris invitations, participations, bonnes réponses)
+      const response = ApiResponse.success({
+        mes_quiz: quizzes,
+        total: quizzes.length,
+        message: 'Liste de vos quiz avec toutes les informations'
       });
-
-      return c.json({
-        success: true,
-        data: quizzesDTO,
-      }, 200);
+      
+      return c.json(response, 200);
     } catch (error: any) {
-      return c.json({
-        success: false,
-        message: error.message || 'Erreur lors de la récupération des quiz',
-      }, 500);
+      const response = ApiResponse.error(
+        ERROR_CODES.INTERNAL_ERROR,
+        error.message || 'Erreur lors de la récupération des quiz'
+      );
+      return c.json(response, 500);
     }
   };
 
   getById = async (c: Context) => {
     try {
-      const id = parseInt(c.req.param('id'));
+      const id = getNumericId(c, 'id');
 
-      if (isNaN(id)) {
+      if (!id) {
         const response = ApiResponse.error(ERROR_CODES.VALIDATION_ERROR, 'ID invalide');
         return c.json(response, 400);
       }
@@ -176,11 +172,11 @@ export class QuizController {
 
   update = async (c: Context) => {
     try {
-      const id = parseInt(c.req.param('id'));
+      const id = getNumericId(c, 'id');
       const body = await c.req.json();
       const utilisateur = getUserFromContext(c);
 
-      if (isNaN(id)) {
+      if (!id) {
         return c.json({
           success: false,
           message: 'ID invalide',
@@ -231,10 +227,10 @@ export class QuizController {
 
   delete = async (c: Context) => {
     try {
-      const id = parseInt(c.req.param('id'));
+      const id = getNumericId(c, 'id');
       const utilisateur = getUserFromContext(c);
 
-      if (isNaN(id)) {
+      if (!id) {
         return c.json({
           success: false,
           message: 'ID invalide',
@@ -271,9 +267,9 @@ export class QuizController {
 
   getWithQuestions = async (c: Context) => {
     try {
-      const id = parseInt(c.req.param('id'));
+      const id = getNumericId(c, 'id');
 
-      if (isNaN(id)) {
+      if (!id) {
         return c.json({
           success: false,
           message: 'ID invalide',
@@ -297,6 +293,47 @@ export class QuizController {
       return c.json({
         success: false,
         message: error.message || 'Erreur lors de la récupération du quiz',
+      }, 500);
+    }
+  };
+
+  publier = async (c: Context) => {
+    try {
+      const id = getNumericId(c, 'id');
+      const utilisateur = getUserFromContext(c);
+
+      if (!id) {
+        return c.json({
+          success: false,
+          message: 'ID invalide',
+        }, 400);
+      }
+
+      const quiz = await this.quizService.publierQuiz(id, utilisateur.userId);
+
+      return c.json({
+        success: true,
+        message: 'Quiz publié avec succès',
+        data: quiz,
+      }, 200);
+    } catch (error: any) {
+      if (error.message === ERROR_MESSAGES.QUIZ_NOT_FOUND) {
+        return c.json({
+          success: false,
+          message: error.message,
+        }, 404);
+      }
+
+      if (error.message === ERROR_MESSAGES.FORBIDDEN) {
+        return c.json({
+          success: false,
+          message: error.message,
+        }, 403);
+      }
+
+      return c.json({
+        success: false,
+        message: error.message || 'Erreur lors de la publication du quiz',
       }, 500);
     }
   };

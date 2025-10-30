@@ -38,7 +38,8 @@ export interface DemarrerParticipationInput {
 export interface SoumettreReponseInput {
   participation_id: number;
   question_id: number;
-  choix_reponse_id?: number; // ID du choix sélectionné
+  reponse_id?: number; // ID du choix sélectionné
+  choix_reponse_id?: number; // Ajouté pour compatibilité repository
   texte_reponse?: string; // Pour texte libre (optionnel)
   temps_reponse?: number;
 }

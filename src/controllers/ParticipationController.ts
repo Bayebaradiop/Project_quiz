@@ -7,6 +7,7 @@ import {
   accederQuizPublicSchema,
 } from '../validations/Participation.validator';
 import { getUserFromContext } from '../middleware/Auth';
+import { getNumericId, encodeResponse, getDecodedBody } from '../middleware/HashId';
 import { ZodError } from 'zod';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../validations/erreurs_messages/Message.error';
 
@@ -21,11 +22,17 @@ export class ParticipationController {
       const body = await c.req.json();
       const validatedData = demarrerParticipationSchema.parse(body);
 
+      // S'assurer que quiz_id est bien un nombre pour DemarrerParticipationInput
+      const demarrerInput: any = {
+        ...validatedData,
+        quiz_id: validatedData.quiz_id ?? 0 // valeur par défaut si non fourni
+      };
+
       // Récupérer l'utilisateur s'il est connecté (optionnel)
       const user = c.get('user') as any || null;
 
       const participation = await participationService.demarrerParticipation(
-        validatedData,
+        demarrerInput,
         user?.userId
       );
 
@@ -120,12 +127,77 @@ export class ParticipationController {
   }
 
   /**
+   * Participer à un quiz public depuis la liste (par ID)
+   */
+  async participerQuizPublic(c: Context) {
+    try {
+      // Récupérer l'ID numérique décodé par le middleware
+      const quiz_id = getNumericId(c, 'quiz_id');
+      const body = await c.req.json().catch(() => ({}));
+
+      // Récupérer l'utilisateur s'il est connecté (optionnel)
+      const user = c.get('user') as any || null;
+
+      const result = await participationService.participerQuizPublic(
+        quiz_id,
+        body.email_participant,
+        body.nom_participant,
+        user?.userId
+      );
+
+      // Encoder les IDs dans la réponse
+      const encodedResult = encodeResponse(result, ['id', 'quiz_id']);
+
+      return c.json(
+        {
+          success: true,
+          message: 'Participation démarrée avec succès',
+          data: encodedResult,
+        },
+        201
+      );
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return c.json(
+          {
+            success: false,
+            message: ERROR_MESSAGES.VALIDATION_ERROR,
+            errors: error.issues.map((e: any) => ({
+              field: e.path.join('.'),
+              message: e.message,
+            })),
+          },
+          400
+        );
+      }
+
+      if (error instanceof Error) {
+        if (error.message === ERROR_MESSAGES.QUIZ_NOT_FOUND) {
+          return c.json({ success: false, message: error.message }, 404);
+        }
+        return c.json({ success: false, message: error.message }, 400);
+      }
+
+      console.error('Erreur lors de la participation au quiz public:', error);
+      return c.json({ success: false, message: ERROR_MESSAGES.INTERNAL_ERROR }, 500);
+    }
+  }
+
+  /**
    * Soumettre une réponse à une question
    */
   async soumettreReponse(c: Context) {
     try {
-      const body = await c.req.json();
-      const validatedData = soumettreReponseSchema.parse(body);
+      // Récupérer les IDs numériques décodés par le middleware
+      const participation_id = getNumericId(c, 'id');
+      const question_id = getNumericId(c, 'question_id');
+      const body = await getDecodedBody(c); // Utilise le body décodé par hashIdBodyMiddleware
+      
+      const validatedData = soumettreReponseSchema.parse({
+        participation_id,
+        question_id,
+        ...body,
+      });
 
       await participationService.soumettreReponse(validatedData);
 
@@ -162,11 +234,11 @@ export class ParticipationController {
    */
   async terminer(c: Context) {
     try {
-      const body = await c.req.json();
-      const validatedData = terminerParticipationSchema.parse(body);
+      // Récupérer l'ID numérique décodé par le middleware
+      const participation_id = getNumericId(c, 'id');
 
       const resultat = await participationService.terminerParticipation(
-        validatedData.participation_id
+        participation_id
       );
 
       return c.json({
@@ -203,14 +275,19 @@ export class ParticipationController {
    */
   async getParticipation(c: Context) {
     try {
-      const id = Number(c.req.param('id'));
-      const user = getUserFromContext(c);
+      // Récupérer l'ID numérique décodé par le middleware
+      const id = getNumericId(c, 'id');
+      // Utilisateur optionnel (peut être anonyme)
+      const user = c.get('user') as any || null;
 
       const participation = await participationService.getParticipation(id, user?.userId);
 
+      // Encoder les IDs dans la réponse
+      const encodedParticipation = encodeResponse(participation, ['id', 'quiz_id', 'utilisateur_id']);
+
       return c.json({
         success: true,
-        data: participation,
+        data: encodedParticipation,
       });
     } catch (error) {
       if (error instanceof Error) {

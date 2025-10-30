@@ -48,9 +48,26 @@ export class InvitationRepository {
   }
 
   async findByCodeAcces(code_acces: string): Promise<Invitation | null> {
-    return (await prisma.invitation.findFirst({
-      where: { code_acces, deletedAt: null },
-    })) as Invitation | null;
+    const code = (code_acces || '').trim();
+    // Recherche tolérante: supprime les espaces accidentels. Utilise une comparaison insensible
+    // à la casse si la base le supporte, sinon la normalisation aide (les codes générés sont en hex lowercase).
+    try {
+      return (await prisma.invitation.findFirst({
+        where: {
+          code_acces: {
+            equals: code,
+            mode: 'insensitive',
+          },
+          deletedAt: null,
+        },
+      })) as Invitation | null;
+    } catch (e) {
+      // Si la clause `mode: 'insensitive'` n'est pas supportée par la version de Prisma/DB,
+      // retomber sur une recherche stricte après normalisation.
+      return (await prisma.invitation.findFirst({
+        where: { code_acces: code.toLowerCase(), deletedAt: null },
+      })) as Invitation | null;
+    }
   }
 
   async findByEmail(email: string): Promise<Invitation[]> {

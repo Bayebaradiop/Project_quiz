@@ -1,157 +1,71 @@
-import { OpenAPIHono } from '@hono/zod-openapi';
+import { Hono } from 'hono';
 import { swaggerUI } from '@hono/swagger-ui';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as yaml from 'js-yaml';
 
 /**
  * Configuration Swagger/OpenAPI pour l'API QuizLab
+ * 
+ * Charge et sert la documentation OpenAPI depuis swagger.yaml
  */
 export const createSwaggerApp = () => {
-  const app = new OpenAPIHono();
+  const app = new Hono();
 
-  // Configuration OpenAPI
-  app.doc('/doc', (c) => ({
-    openapi: '3.0.0',
-    info: {
-      version: '1.0.0',
-      title: 'QuizLab API',
-      description: `
-# 🎯 API QuizLab - Documentation Interactive
+  // Charger le fichier swagger.yaml
+  const swaggerPath = path.join(process.cwd(), 'swagger.yaml');
+  const swaggerFile = fs.readFileSync(swaggerPath, 'utf8');
+  const swaggerSpec = yaml.load(swaggerFile) as any;
 
-API REST pour système de quiz avec questions à choix multiples (QCM).
-
-## 🔒 Authentification
-
-L'API utilise des **cookies httpOnly** avec JWT pour l'authentification.
-
-### Endpoints PUBLICS ✅ (Sans authentification)
-- Inscription & Connexion
-- Consultation des quiz
-- Participations complètes (démarrer, répondre, terminer)
-
-### Endpoints PROTÉGÉS 🔒 (Authentification requise)
-- Gestion des quiz (créer, modifier, supprimer)
-- Gestion des questions
-- Invitations
-- Statistiques
-
-## 📚 Documentation Complète
-
-- [Guide de Test Complet](https://github.com/Bayebaradiop/Project_quiz/blob/feature/api-standardization/GUIDE_TEST_COMPLET_POSTMAN.md)
-- [Sécurité des Endpoints](https://github.com/Bayebaradiop/Project_quiz/blob/feature/api-standardization/ENDPOINTS_SECURITY.md)
-- [Flux Utilisateurs](https://github.com/Bayebaradiop/Project_quiz/blob/feature/api-standardization/FLUX_UTILISATEURS.md)
-
-## 🚀 Démarrage Rapide
-
-1. **S'inscrire** : POST /api/v1/utilisateurs/register
-2. **Se connecter** : POST /api/v1/utilisateurs/login
-3. **Créer un quiz** : POST /api/v1/quizzes (🔒 authentifié)
-4. **Passer un quiz** : POST /api/v1/participations (✅ public)
-      `,
-    },
-    servers: [
-      {
-        url: 'http://localhost:3000',
-        description: 'Serveur de développement',
-      },
-      {
-        url: 'https://api.quizlab.com',
-        description: 'Serveur de production',
-      },
-    ],
-    tags: [
-      {
-        name: 'Authentification',
-        description: '👤 Inscription, connexion, profil utilisateur',
-      },
-      {
-        name: 'Quiz',
-        description: '📝 Gestion des quiz (CRUD)',
-      },
-      {
-        name: 'Questions',
-        description: '❓ Gestion des questions et choix de réponses',
-      },
-      {
-        name: 'Invitations',
-        description: '✉️ Invitations aux quiz',
-      },
-      {
-        name: 'Participations',
-        description: '🎯 Passer un quiz, répondre, voir score',
-      },
-      {
-        name: 'Statistiques',
-        description: '📊 Résultats et statistiques des quiz',
-      },
-    ],
-    components: {
-      securitySchemes: {
-        cookieAuth: {
-          type: 'apiKey',
-          in: 'cookie',
-          name: 'quiz_session',
-          description: 'Cookie de session avec JWT',
-        },
-      },
-      schemas: {
-        Error: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean', example: false },
-            message: { type: 'string', example: 'Erreur lors de la requête' },
-            errors: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  field: { type: 'string' },
-                  message: { type: 'string' },
-                },
-              },
-            },
-          },
-        },
-        ApiResponse: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' },
-            data: { type: 'object' },
-            meta: {
-              type: 'object',
-              properties: {
-                timestamp: { type: 'string', format: 'date-time' },
-                version: { type: 'string', example: '1.0.0' },
-              },
-            },
-            pagination: {
-              type: 'object',
-              properties: {
-                page: { type: 'number' },
-                limit: { type: 'number' },
-                total: { type: 'number' },
-                totalPages: { type: 'number' },
-                hasNext: { type: 'boolean' },
-                hasPrev: { type: 'boolean' },
-              },
-            },
-          },
-        },
-      },
-    },
-    security: [
-      {
-        cookieAuth: [],
-      },
-    ],
-  }));
+  // Endpoint JSON de la spécification OpenAPI
+  app.get('/api-docs.json', (c) => {
+    return c.json(swaggerSpec);
+  });
 
   // Interface Swagger UI
   app.get(
-    '/ui',
+    '/api-docs',
     swaggerUI({
-      url: '/doc',
+      url: '/api-docs.json',
     })
   );
 
+  // Route pour servir directement le YAML
+  app.get('/swagger.yaml', (c) => {
+    c.header('Content-Type', 'application/x-yaml');
+    return c.text(swaggerFile);
+  });
+
+  console.log('\n📚 Documentation Swagger disponible sur:');
+  console.log('   - http://localhost:3000/api-docs (Interface UI)');
+  console.log('   - http://localhost:3000/api-docs.json (JSON)');
+  console.log('   - http://localhost:3000/swagger.yaml (YAML)\n');
+
   return app;
+};
+
+// Fonction pour créer les routes Swagger (compatibilité avec server.ts)
+export const createSwaggerRoutes = (app: Hono) => {
+  const swaggerPath = path.join(process.cwd(), 'swagger.yaml');
+  const swaggerFile = fs.readFileSync(swaggerPath, 'utf8');
+  const swaggerSpec = yaml.load(swaggerFile) as any;
+
+  // Endpoint JSON de la spécification OpenAPI
+  app.get('/api-docs.json', (c) => {
+    return c.json(swaggerSpec);
+  });
+
+  // Interface Swagger UI
+  app.get(
+    '/api-docs',
+    swaggerUI({
+      url: '/api-docs.json',
+    })
+  );
+
+  // Route pour servir directement le YAML
+  app.get('/swagger.yaml', (c) => {
+    c.header('Content-Type', 'application/x-yaml');
+    return c.text(swaggerFile);
+  });
 };

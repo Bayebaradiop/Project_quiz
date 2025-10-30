@@ -148,7 +148,8 @@ export class InvitationService {
     invitation?: Invitation;
     message: string;
   }> {
-    const invitation = await invitationRepository.findByCodeAcces(code_acces);
+    const code = (code_acces || '').trim();
+    const invitation = await invitationRepository.findByCodeAcces(code);
 
     if (!invitation) {
       return {

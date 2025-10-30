@@ -2,7 +2,7 @@ import { ReponseRepository } from '../repositories/ReponseRepository';
 import { QuestionRepository } from '../repositories/QuestionRepository';
 import { QuizRepository } from '../repositories/QuizRepository';
 import { Reponse } from '../interfaces/ReponseInterface';
-import { CreateReponseInput, UpdateReponseInput } from '../validations/Reponse.validator';
+import { CreateReponseInput, UpdateReponseInput } from '../interfaces/ReponseInterface';
 import { ERROR_MESSAGES } from '../validations/erreurs_messages/Message.error';
 
 export class ReponseService {
@@ -31,9 +31,10 @@ export class ReponseService {
 
     return await this.reponseRepository.create({
       question_id,
-      texte_reponse: data.texte_reponse,
-      est_correcte: data.est_correcte,
-      ordre: data.ordre ?? null,
+      utilisateur_id: data.utilisateur_id,
+      reponse_donnee: data.reponse_donnee,
+      est_correcte: data.est_correcte ?? false,
+      temps_reponse: data.temps_reponse ?? null,
     });
   }
 
@@ -72,12 +73,12 @@ export class ReponseService {
       throw new Error(ERROR_MESSAGES.FORBIDDEN);
     }
 
-    const updateData: any = {};
-    if (data.texte_reponse !== undefined) updateData.texte_reponse = data.texte_reponse;
-    if (data.est_correcte !== undefined) updateData.est_correcte = data.est_correcte;
-    if (data.ordre !== undefined) updateData.ordre = data.ordre ?? null;
+  const updateData: any = {};
+  if (data.reponse_donnee !== undefined) updateData.reponse_donnee = data.reponse_donnee;
+  if (data.est_correcte !== undefined) updateData.est_correcte = data.est_correcte;
+  if (data.temps_reponse !== undefined) updateData.temps_reponse = data.temps_reponse;
 
-    return await this.reponseRepository.update(id, updateData);
+  return await this.reponseRepository.update(id, updateData);
   }
 
   async deleteReponse(id: number, createur_id: number): Promise<Reponse> {
@@ -103,8 +104,8 @@ export class ReponseService {
   }
 
   async getNextOrdre(question_id: number): Promise<number> {
-    const maxOrdre = await this.reponseRepository.getMaxOrdre(question_id);
-    return maxOrdre + 1;
+  // La gestion de l'ordre n'est plus utilisée dans le modèle actuel
+  return 1;
   }
 
   async countCorrectAnswers(question_id: number): Promise<number> {

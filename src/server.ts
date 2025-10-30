@@ -2,13 +2,14 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { ENV, validateEnv } from './config/env.config';
+import { autoEncodeIdsMiddleware } from './middleware/HashId';
 import utilisateursRoutes from './routes/utilisateurs.routes';
 import quizzesRoutes from './routes/quizzes.routes';
 import questionsRoutes from './routes/questions.routes';
 import reponsesRoutes from './routes/reponses.routes';
 import { invitationRoutes } from './routes/invitations.routes';
 import { participationRoutes } from './routes/participations.routes';
-import { createSwaggerRoutes } from './config/swagger.simple';
+import { createSwaggerRoutes } from './config/swagger.config';
 
 validateEnv();
 
@@ -23,6 +24,10 @@ app.use('*', cors({
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// 🔐 MIDDLEWARE AUTOMATIQUE: Encode TOUS les IDs dans TOUTES les réponses
+// Le frontend ne voit JAMAIS les IDs numériques - ZÉRO logique côté frontend
+app.use('/api/v1/*', autoEncodeIdsMiddleware);
 
 app.get('/', (c) => {
   return c.json({

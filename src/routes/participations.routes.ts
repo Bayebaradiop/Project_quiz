@@ -1,30 +1,51 @@
 import { Hono } from 'hono';
 import { ParticipationController } from '../controllers/ParticipationController';
 import { authMiddleware } from '../middleware/Auth';
+import { hashIdMiddleware, hashIdBodyMiddleware } from '../middleware/HashId';
 
 const participationRoutes = new Hono();
 const participationController = new ParticipationController();
 
 // Routes publiques (pas d'authentification requise)
+// Participer à un quiz public depuis la liste (par ID crypté)
+participationRoutes.post(
+  '/quiz/:quiz_id', 
+  hashIdMiddleware('quiz_id'),
+  (c) => participationController.participerQuizPublic(c)
+);
+
 // Accéder à un quiz public via lien de partage
 participationRoutes.post('/public/:lien_partage', (c) =>
   participationController.accederQuizPublic(c)
 );
 
-// Démarrer une participation (authentifié ou anonyme)
+// Démarrer une participation avec code d'invitation
 participationRoutes.post('/', (c) => participationController.demarrer(c));
 
-// Soumettre une réponse
-participationRoutes.post('/reponses', (c) => participationController.soumettreReponse(c));
+// Récupérer une participation (ID crypté)
+participationRoutes.get(
+  '/:id',
+  hashIdMiddleware('id'),
+  (c) => participationController.getParticipation(c)
+);
 
-// Terminer une participation
-participationRoutes.post('/terminer', (c) => participationController.terminer(c));
+// Soumettre une réponse (IDs cryptés dans URL et body)
+participationRoutes.post(
+  '/:id/questions/:question_id/reponse',
+  hashIdMiddleware('id', 'question_id'),
+  hashIdBodyMiddleware('reponse_id'),
+  (c) => participationController.soumettreReponse(c)
+);
+
+// Terminer une participation (ID crypté)
+participationRoutes.post(
+  '/:id/terminer',
+  hashIdMiddleware('id'),
+  (c) => participationController.terminer(c)
+);
 
 // Abandonner une participation
 participationRoutes.post('/:id/abandonner', (c) => participationController.abandonner(c));
-
-// Récupérer une participation
-participationRoutes.get('/:id', (c) => participationController.getParticipation(c));
 
 // Routes protégées (authentification requise)
 participationRoutes.use('/mes-participations', authMiddleware);

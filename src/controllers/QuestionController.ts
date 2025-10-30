@@ -3,6 +3,7 @@ import { QuestionService } from '../services/Question.Service';
 import { createQuestionSchema, updateQuestionSchema } from '../validations/Question.validator';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../validations/erreurs_messages/Message.error';
 import { getUserFromContext } from '../middleware/Auth';
+import { getNumericId } from '../middleware/HashId';
 import { ZodError } from 'zod';
 
 export class QuestionController {
@@ -16,9 +17,9 @@ export class QuestionController {
     try {
       const body = await c.req.json();
       const utilisateur = getUserFromContext(c);
-      const quiz_id = parseInt(c.req.param('quizId'));
+      const quiz_id = getNumericId(c, 'quizId');
 
-      if (isNaN(quiz_id)) {
+      if (!quiz_id) {
         return c.json({
           success: false,
           message: 'ID du quiz invalide',
@@ -85,9 +86,9 @@ export class QuestionController {
 
   getAllByQuizId = async (c: Context) => {
     try {
-      const quiz_id = parseInt(c.req.param('quizId'));
+      const quiz_id = getNumericId(c, 'quizId');
 
-      if (isNaN(quiz_id)) {
+      if (!quiz_id) {
         return c.json({
           success: false,
           message: 'ID du quiz invalide',
@@ -283,9 +284,9 @@ export class QuestionController {
 
   getNextOrdre = async (c: Context) => {
     try {
-      const quiz_id = parseInt(c.req.param('quizId'));
+      const quiz_id = getNumericId(c, 'quizId');
 
-      if (isNaN(quiz_id)) {
+      if (!quiz_id) {
         return c.json({
           success: false,
           message: 'ID du quiz invalide',

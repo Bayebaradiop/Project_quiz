@@ -27,7 +27,6 @@
   "license": "MIT",
   "dependencies": {
     "@hono/node-server": "^1.19.5",
-    "@hono/swagger-ui": "^0.5.2",
     "@hono/zod-openapi": "^1.1.4",
     "@prisma/client": "^6.18.0",
     "@types/bcrypt": "^6.0.0",
@@ -35,6 +34,7 @@
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.3",
+    "hashids": "^2.3.0",
     "hono": "^4.10.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.10",
@@ -43,10 +43,13 @@
     "zod-openapi": "^5.4.3"
   },
   "devDependencies": {
+    "@hono/swagger-ui": "^0.5.2",
     "@types/bcryptjs": "^2.4.6",
+    "@types/js-yaml": "^4.0.9",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.9.1",
     "@types/nodemailer": "^7.0.3",
+    "js-yaml": "^4.1.0",
     "nodemon": "^3.1.10",
     "prisma": "^6.18.0",
     "tsx": "^4.20.6",

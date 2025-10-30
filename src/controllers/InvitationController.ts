@@ -7,6 +7,7 @@ import {
   validateInvitationSchema,
 } from '../validations/Invitation.validator';
 import { getUserFromContext } from '../middleware/Auth';
+import { getNumericId } from '../middleware/HashId';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../validations/erreurs_messages/Message.error';
 
 const invitationService = new InvitationService();
@@ -23,7 +24,11 @@ export class InvitationController {
         return c.json({ success: false, message: ERROR_MESSAGES.UNAUTHORIZED }, 401);
       }
 
-      const quizId = Number(c.req.param('quizId'));
+      const quizId = getNumericId(c, 'quizId');
+      if (!quizId) {
+        return c.json({ success: false, message: 'ID du quiz invalide' }, 400);
+      }
+      
       const body = await c.req.json();
 
       // Validation
@@ -106,7 +111,11 @@ export class InvitationController {
         return c.json({ success: false, message: ERROR_MESSAGES.UNAUTHORIZED }, 401);
       }
 
-      const quizId = Number(c.req.param('quizId'));
+      const quizId = getNumericId(c, 'quizId');
+      if (!quizId) {
+        return c.json({ success: false, message: 'ID du quiz invalide' }, 400);
+      }
+      
       const invitations = await invitationService.getInvitationsByQuizId(quizId, user.userId);
 
       return c.json({
@@ -139,7 +148,11 @@ export class InvitationController {
         return c.json({ success: false, message: ERROR_MESSAGES.UNAUTHORIZED }, 401);
       }
 
-      const id = Number(c.req.param('id'));
+      const id = getNumericId(c, 'id');
+      if (!id) {
+        return c.json({ success: false, message: 'ID invalide' }, 400);
+      }
+      
       const invitation = await invitationService.getInvitationById(id, user.userId);
 
       return c.json({
@@ -225,7 +238,11 @@ export class InvitationController {
         return c.json({ success: false, message: ERROR_MESSAGES.UNAUTHORIZED }, 401);
       }
 
-      const id = Number(c.req.param('id'));
+      const id = getNumericId(c, 'id');
+      if (!id) {
+        return c.json({ success: false, message: 'ID invalide' }, 400);
+      }
+      
       const body = await c.req.json();
 
       // Validation
@@ -278,7 +295,11 @@ export class InvitationController {
         return c.json({ success: false, message: ERROR_MESSAGES.UNAUTHORIZED }, 401);
       }
 
-      const id = Number(c.req.param('id'));
+      const id = getNumericId(c, 'id');
+      if (!id) {
+        return c.json({ success: false, message: 'ID invalide' }, 400);
+      }
+      
       await invitationService.deleteInvitation(id, user.userId);
 
       return c.json({
@@ -310,7 +331,11 @@ export class InvitationController {
         return c.json({ success: false, message: ERROR_MESSAGES.UNAUTHORIZED }, 401);
       }
 
-      const id = Number(c.req.param('id'));
+      const id = getNumericId(c, 'id');
+      if (!id) {
+        return c.json({ success: false, message: 'ID invalide' }, 400);
+      }
+      
       await invitationService.sendReminder(id, user.userId);
 
       return c.json({

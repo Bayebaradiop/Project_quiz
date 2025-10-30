@@ -101,4 +101,40 @@ export class QuizService {
     }
     return quiz;
   }
+
+  /**
+   * Récupère tous les quiz publics avec leurs questions et créateur
+   * (pour les participants non connectés)
+   */
+  async getQuizzesPublicWithQuestions(skip: number, take: number) {
+    const [quizzes, total] = await Promise.all([
+      this.quizRepository.findAllPublicWithQuestions(skip, take),
+      this.quizRepository.countPublic(),
+    ]);
+    return { quizzes, total };
+  }
+
+  async publierQuiz(id: number, createur_id: number): Promise<Quiz> {
+    const quiz = await this.quizRepository.findById(id);
+
+    if (!quiz) {
+      throw new Error(ERROR_MESSAGES.QUIZ_NOT_FOUND);
+    }
+
+    if (quiz.createur_id !== createur_id) {
+      throw new Error(ERROR_MESSAGES.FORBIDDEN);
+    }
+
+    if (quiz.statut !== 'brouillon') {
+      throw new Error('Le quiz doit être en statut "brouillon" pour être publié');
+    }
+
+    // Vérifier qu'il y a au moins une question
+    const questionsCount = await this.quizRepository.countQuestions(id);
+    if (questionsCount === 0) {
+      throw new Error('Le quiz doit contenir au moins une question');
+    }
+
+    return await this.quizRepository.update(id, { statut: 'publie' });
+  }
 }

@@ -43,3 +43,28 @@ export const getUserFromContext = (c: Context): JWTPayload => {
   }
   return user;
 };
+
+/**
+ * Middleware d'authentification OPTIONNEL
+ * Vérifie le token JWT mais ne bloque pas si absent
+ * Utile pour les routes qui ont un comportement différent selon l'authentification
+ */
+export const optionalAuthMiddleware = async (c: Context, next: Next) => {
+  try {
+    // Récupérer le token depuis le cookie
+    const token = getCookie(c, JWT_CONFIG.accessTokenCookieName);
+
+    if (token) {
+      // Si token présent, le vérifier et l'ajouter au contexte
+      const decoded = verifyAccessToken(token);
+      c.set('user', decoded);
+    }
+    // Sinon, continuer sans utilisateur (user sera undefined)
+  } catch (error) {
+    // En cas d'erreur de vérification, ignorer et continuer
+    // (le token est invalide mais on ne bloque pas)
+  }
+
+  await next();
+  return;
+};

@@ -1,22 +1,27 @@
 import { z } from 'zod';
 
 export const demarrerParticipationSchema = z.object({
-  quiz_id: z.number().int().positive('L\'ID du quiz doit être positif'),
+  quiz_id: z.number().int().positive('L\'ID du quiz doit être positif').optional(),
   code_acces: z.string().optional(),
   email_participant: z.string().email('Email invalide').optional(),
   nom_participant: z.string().min(2, 'Le nom doit contenir au moins 2 caractères').optional(),
-});
+}).refine(
+  (data) => data.quiz_id !== undefined || data.code_acces !== undefined,
+  {
+    message: 'Vous devez fournir soit quiz_id soit code_acces',
+  }
+);
 
 export const soumettreReponseSchema = z.object({
   participation_id: z.number().int().positive('L\'ID de participation doit être positif'),
   question_id: z.number().int().positive('L\'ID de la question doit être positif'),
-  choix_reponse_id: z.number().int().positive('L\'ID du choix de réponse doit être positif').optional(),
+  reponse_id: z.number().int().positive('L\'ID de la réponse doit être positif').optional(),
   texte_reponse: z.string().optional(),
   temps_reponse: z.number().int().nonnegative('Le temps de réponse doit être positif').optional(),
 }).refine(
-  (data) => data.choix_reponse_id !== undefined || data.texte_reponse !== undefined,
+  (data) => data.reponse_id !== undefined || data.texte_reponse !== undefined,
   {
-    message: 'Vous devez fournir soit choix_reponse_id soit texte_reponse',
+    message: 'Vous devez fournir soit reponse_id soit texte_reponse',
   }
 );
 

@@ -1,385 +1,255 @@
-# Documentation Swagger - QuizLab API
+# 📚 Guide Swagger - Documentation API Interactive
 
-## Accès à la Documentation Interactive
+## 🚀 Comment accéder à la documentation Swagger
 
-### Interface Swagger UI
+Votre serveur est déjà démarré ! Accédez à la documentation via votre navigateur :
 
-Une fois le serveur démarré, accédez à :
+### URLs disponibles :
 
-**URL :** http://localhost:3000/api-docs
-
-Cette interface vous permet de :
-- Voir tous les endpoints de l'API
-- Tester les requêtes directement depuis le navigateur
-- Voir les schémas de validation (request/response)
-- Comprendre les codes de statut HTTP
-
----
-
-## Démarrage
-
-### 1. Installation
-
-Les packages Swagger sont déjà installés :
-
-```bash
-npm install @hono/swagger-ui @hono/zod-openapi zod-openapi
-```
-
-### 2. Lancer le serveur
-
-```bash
-npm run dev
-```
-
-### 3. Accéder à Swagger
-
-Ouvrir dans le navigateur :
-
-```
-http://localhost:3000/api-docs
-```
-
----
-
-## Utilisation de Swagger UI
-
-### Interface Swagger
-
-```
-┌────────────────────────────────────────────────────────┐
-│  QuizLab API - Swagger UI                              │
-├────────────────────────────────────────────────────────┤
-│                                                        │
-│  [Authentification]  ▼                                 │
-│    POST /api/v1/utilisateurs/register                  │
-│    POST /api/v1/utilisateurs/login                     │
-│                                                        │
-│  [Quiz]  ▼                                             │
-│    POST /api/v1/quizzes                    PROTEGE     │
-│    GET  /api/v1/quizzes                    PROTEGE     │
-│                                                        │
-│  [Participations]  ▼                                   │
-│    POST /api/v1/participations             PUBLIC      │
-│    POST /api/v1/participations/reponses    PUBLIC      │
-│    POST /api/v1/participations/terminer    PUBLIC      │
-│                                                        │
-└────────────────────────────────────────────────────────┘
-```
-
-### Symboles
-
-- **PUBLIC** - Pas d'authentification requise
-- **PROTEGE** - Authentification requise (cookie)
-
----
-
-## Tester un Endpoint
-
-### Exemple : S'inscrire
-
-1. **Cliquer sur** `POST /api/v1/utilisateurs/register`
-
-2. **Cliquer sur** "Try it out"
-
-3. **Modifier le JSON** :
-   ```json
-   {
-     "nom": "Dupont",
-     "prenom": "Jean",
-     "email": "jean.dupont@example.com",
-     "mot_de_passe": "SecurePass@123"
-   }
+1. **Interface Swagger UI Interactive** ⭐ (Recommandé)
    ```
-
-4. **Cliquer sur** "Execute"
-
-5. **Voir la réponse** :
-   ```json
-   {
-     "success": true,
-     "message": "Utilisateur créé avec succès",
-     "data": {
-       "id": 5,
-       "nom": "Dupont",
-       "prenom": "Jean",
-       "email": "jean.dupont@example.com"
-     }
-   }
+   http://localhost:3000/api-docs
    ```
+   - Interface graphique complète
+   - Testez directement les endpoints
+   - Voir les exemples de requêtes/réponses
+
+2. **Spécification JSON**
+   ```
+   http://localhost:3000/api-docs.json
+   ```
+   - Format JSON de la spec OpenAPI 3.0.3
+   - Utile pour outils d'import (Postman, Insomnia)
+
+3. **Fichier YAML original**
+   ```
+   http://localhost:3000/swagger.yaml
+   ```
+   - Version YAML lisible
+   - Utile pour édition/versioning
 
 ---
 
-## Tester avec Authentification
+## 📖 Ce qui a été ajouté dans la documentation
 
-### Étape 1 : Se connecter
-
-1. **POST** `/api/v1/utilisateurs/login`
-2. **Body** :
-   ```json
-   {
-     "email": "jean.dupont@example.com",
-     "mot_de_passe": "SecurePass@123"
-   }
-   ```
-3. **Execute** → Le cookie est automatiquement stocké par le navigateur
-
-### Étape 2 : Utiliser un endpoint protégé
-
-1. **POST** `/api/v1/quizzes` [PROTEGE]
-2. **Body** :
-   ```json
-   {
-     "titre": "Quiz JavaScript",
-     "description": "Test Swagger",
-     "type_quiz": "instantane",
-     "statut": "brouillon"
-   }
-   ```
-3. **Execute** → Fonctionne car le cookie est envoyé automatiquement !
-
----
-
-## Endpoints Documentés
-
-### 1. Authentification (Public)
-
-| Endpoint | Méthode | Description |
-|----------|---------|-------------|
-| `/api/v1/utilisateurs/register` | POST | Inscription |
-| `/api/v1/utilisateurs/login` | POST | Connexion |
-
-### 2. Quiz (Protégé)
-
-| Endpoint | Méthode | Description |
-|----------|---------|-------------|
-| `/api/v1/quizzes` | POST | Créer quiz |
-| `/api/v1/quizzes` | GET | Liste quiz (paginés) |
-
-### 3. Participations (Public)
-
-| Endpoint | Méthode | Description |
-|----------|---------|-------------|
-| `/api/v1/participations` | POST | Démarrer quiz |
-| `/api/v1/participations/reponses` | POST | Répondre |
-| `/api/v1/participations/terminer` | POST | Terminer & score |
-
----
-
-## Personnalisation
-
-### Ajouter un nouvel endpoint
-
-Modifier `src/config/swagger.simple.ts` :
-
-```typescript
-'/api/v1/votre-endpoint': {
-  post: {
-    tags: ['Catégorie'],
-    summary: 'Description courte',
-    description: 'Description détaillée',
-    requestBody: {
-      required: true,
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            required: ['champ1', 'champ2'],
-            properties: {
-              champ1: { type: 'string', example: 'Exemple' },
-              champ2: { type: 'number', example: 42 },
-            },
-          },
-        },
-      },
-    },
-    responses: {
-      '200': { description: 'Succès' },
-      '400': { description: 'Erreur validation' },
-    },
-  },
-},
+### ✅ 1. Endpoint pour PUBLIER un quiz
+```http
+PATCH /api/v1/quizzes/{id}/publier
 ```
+**Fonctionnalité :**
+- Change le statut d'un quiz de `brouillon` → `publie`
+- Rend le quiz accessible aux participants
+- Vérifie qu'il y a au moins une question
 
----
-
-## Swagger vs Postman
-
-| Critère | Swagger | Postman |
-|---------|---------|---------|
-| **Interface** | Web (navigateur) | Application desktop |
-| **Tests** | Basique | Avancé (scripts, tests auto) |
-| **Documentation** | Automatique | Manuel |
-| **Partage** | URL simple | Export collection |
-| **Idéal pour** | Démo, doc, tests rapides | Tests complets, automation |
-
----
-
-## Recommandations
-
-### Utilisez Swagger pour :
-- Démontrer l'API à l'équipe frontend
-- Tests rapides pendant le développement
-- Documentation toujours à jour
-- Onboarding nouveaux développeurs
-
-### Utilisez Postman pour :
-- Tests E2E complets (voir [GUIDE_TEST_COMPLET_POSTMAN.md](./GUIDE_TEST_COMPLET_POSTMAN.md))
-- Scénarios complexes (8 sections documentées)
-- Automation avec Newman
-- Tests de régression
-
----
-
-## Configuration Avancée
-
-### Personnaliser l'interface Swagger
-
-Dans `src/config/swagger.simple.ts` :
-
-```typescript
-app.get(
-  '/api-docs',
-  swaggerUI({
-    url: '/api-docs.json',
-    // Personnalisation
-    theme: 'dark', // ou 'light'
-    docExpansion: 'list', // 'none', 'list', 'full'
-    defaultModelsExpandDepth: 1,
-  })
-);
-```
-
-### Exporter la spécification OpenAPI
-
+**Exemple :**
 ```bash
-curl http://localhost:3000/api-docs.json > openapi.json
+curl -X PATCH 'http://localhost:3000/api/v1/quizzes/VAG7e3Qj/publier' \
+  -H 'Cookie: token=...'
 ```
 
-Cette spec peut être :
-- Importée dans Postman
-- Utilisée pour générer du code client
-- Partagée avec des partenaires
-
 ---
 
-## Limitations
+### ✅ 2. Liste des quiz (PUBLIC et AUTHENTIFIÉ)
+```http
+GET /api/v1/quizzes
+```
 
-### Ce qui N'est PAS documenté dans Swagger
+**DEUX CAS clairement documentés :**
 
-Pour une documentation complète, consulter :
+#### 🌍 CAS 1: Sans authentification (PUBLIC)
+- Retourne UNIQUEMENT les quiz **publiés ET publics**
+- Accessible à tout le monde
+- Utile pour page d'accueil
 
-1. **[GUIDE_TEST_COMPLET_POSTMAN.md](./GUIDE_TEST_COMPLET_POSTMAN.md)**
-   - 8 sections complètes
-   - Scénarios de test détaillés
-   - Modification de réponses
-   - Flux complets A-Z
-
-2. **[ENDPOINTS_SECURITY.md](./ENDPOINTS_SECURITY.md)**
-   - Liste complète des 32 endpoints
-   - Règles de sécurité détaillées
-   - Middleware Auth
-   - Vérifications propriétaire
-
-3. **[FLUX_UTILISATEURS.md](./FLUX_UTILISATEURS.md)**
-   - Parcours utilisateurs complets
-   - Diagrammes visuels
-   - Métriques de conversion
-
----
-
-## Ressources
-
-### Liens Utiles
-
-- **Swagger Editor** : https://editor.swagger.io/
-- **OpenAPI Spec** : https://swagger.io/specification/
-- **Hono + Swagger** : https://github.com/honojs/middleware/tree/main/packages/swagger-ui
-
-### Documentation Projet
-
-| Document | Lien |
-|----------|------|
-| Guide Test Complet | [GUIDE_TEST_COMPLET_POSTMAN.md](./GUIDE_TEST_COMPLET_POSTMAN.md) |
-| Sécurité Endpoints | [ENDPOINTS_SECURITY.md](./ENDPOINTS_SECURITY.md) |
-| Flux Utilisateurs | [FLUX_UTILISATEURS.md](./FLUX_UTILISATEURS.md) |
-| Index Navigation | [INDEX.md](./INDEX.md) |
-
----
-
-## Exemples d'Utilisation
-
-### Scénario 1 : Nouveau développeur frontend
-
-1. Ouvrir http://localhost:3000/api-docs
-2. Explorer les endpoints disponibles
-3. Tester l'inscription : `POST /utilisateurs/register`
-4. Tester la connexion : `POST /utilisateurs/login`
-5. Voir qu'un cookie est défini automatiquement
-6. Tester création quiz : `POST /quizzes` (protégé)
-7. Comprendre le flux en 10 minutes !
-
-### Scénario 2 : Démonstration client
-
-1. Partager le lien : http://your-server.com/api-docs
-2. Le client peut tester directement dans son navigateur
-3. Pas besoin d'installer Postman
-4. Interface professionnelle et claire
-5. Documentation toujours à jour avec le code
-
-### Scénario 3 : Génération client SDK
-
+**Exemple :**
 ```bash
-# Exporter la spec
-curl http://localhost:3000/api-docs.json > openapi.json
+curl http://localhost:3000/api/v1/quizzes
+```
 
-# Générer client TypeScript
-npx @openapitools/openapi-generator-cli generate \
-  -i openapi.json \
-  -g typescript-fetch \
-  -o ./client-sdk
+#### 🔒 CAS 2: Avec authentification
+- Retourne TOUS les quiz de l'utilisateur connecté
+- Inclut brouillons, publiés, archivés
+- Permet de gérer ses quiz
+
+**Exemple :**
+```bash
+curl http://localhost:3000/api/v1/quizzes \
+  -H 'Cookie: token=...'
 ```
 
 ---
 
-## Checklist de Configuration
+### ✅ 3. Participations (DEUX CAS)
 
-- [x] Packages Swagger installés
-- [x] Fichier `swagger.simple.ts` créé
-- [x] Configuration intégrée dans `server.ts`
-- [x] Endpoint `/api-docs.json` accessible
-- [x] Interface UI `/api-docs` fonctionnelle
-- [ ] Documenter tous les endpoints (32 au total)
-- [ ] Ajouter exemples de réponses
-- [ ] Tester avec authentification
-- [ ] Partager URL avec l'équipe
+#### 🌍 CAS 1: Participation à un QUIZ PUBLIC
+```http
+POST /api/v1/participations/quiz/{quiz_id}
+```
 
----
+**Quand l'utiliser :**
+- Quiz visible dans liste publique
+- Quiz avec `statut: "publie"` ET `est_public: true`
+- Pas besoin de code d'invitation
 
-## Avantages de Swagger dans QuizLab
+**Workflow complet :**
+1. `GET /quizzes` (sans auth) → liste quiz publics
+2. Choisir un quiz → récupérer son `quiz_id` (ex: "VAG7e3Qj")
+3. `POST /participations/quiz/VAG7e3Qj` → démarrer participation
 
-### Pour les Développeurs
-- Tests rapides sans Postman
-- Documentation auto-générée
-- Validation schémas en un coup d'œil
-
-### Pour l'Équipe Frontend
-- Voir les endpoints disponibles
-- Comprendre les formats de données
-- Tester sans backend local
-
-### Pour les Product Managers
-- Vue d'ensemble de l'API
-- Démonstration facile aux clients
-- Pas besoin de compétences techniques
-
-### Pour les QA
-- Tests exploratoires rapides
-- Validation des schémas
-- Complémentaire à Postman
+**Erreur courante :**
+```json
+{
+  "success": false,
+  "message": "Ce quiz n'est pas encore disponible"
+}
+```
+➡️ **Solution:** Le quiz doit être PUBLIÉ d'abord avec `PATCH /quizzes/{id}/publier`
 
 ---
 
-**Documentation complète :** [INDEX.md](./INDEX.md)  
-**Dernière mise à jour :** 28 octobre 2025  
-**Version :** 1.0.0
+#### ✉️ CAS 2: Participation avec CODE D'INVITATION
+```http
+POST /api/v1/participations
+```
+
+**Quand l'utiliser :**
+- Quiz avec invitations par email
+- Quiz privés (accessible UNIQUEMENT par invitation)
+- Quiz publics avec invitations personnalisées
+
+**Workflow complet :**
+1. Créateur envoie invitation → `POST /invitations`
+2. Participant reçoit email avec `code_acces`
+3. (Optionnel) Valider le code → `POST /invitations/validate`
+4. `POST /participations` avec `code_acces` → démarrer participation
+
+**DIFFÉRENCE CLÉS :**
+- `quiz_id` N'EST PAS requis (calculé depuis l'invitation)
+- Fonctionne même si quiz privé
+- Code doit être valide et non expiré
+
+**Exemple :**
+```json
+{
+  "code_acces": "df22be74d996f008cb04ee412b5f1aa1",
+  "email_participant": "participant@example.com"
+}
+```
+
+---
+
+## 🧪 Comment tester dans Swagger UI
+
+### Étape 1: Ouvrir Swagger UI
+Allez sur : http://localhost:3000/api-docs
+
+### Étape 2: S'authentifier (pour endpoints protégés)
+1. Cliquer sur un endpoint PUBLIC comme `POST /utilisateurs/login`
+2. Tester la connexion (le cookie sera automatiquement stocké)
+3. Tous les endpoints protégés fonctionneront ensuite
+
+### Étape 3: Tester le workflow complet
+
+#### Workflow QUIZ PUBLIC :
+```
+1. POST /utilisateurs/register → créer compte
+2. POST /utilisateurs/login → se connecter (cookie auto)
+3. POST /quizzes → créer quiz
+4. POST /quizzes/{id}/questions → ajouter questions
+5. PATCH /quizzes/{id}/publier → PUBLIER LE QUIZ ⭐
+6. GET /quizzes (sans auth) → voir quiz dans liste publique
+7. POST /participations/quiz/{quiz_id} → participer
+```
+
+#### Workflow QUIZ PRIVÉ (avec invitation) :
+```
+1. POST /utilisateurs/register → créer compte
+2. POST /utilisateurs/login → se connecter
+3. POST /quizzes → créer quiz (est_public: false)
+4. POST /quizzes/{id}/questions → ajouter questions
+5. PATCH /quizzes/{id}/publier → publier ⭐
+6. POST /invitations → envoyer invitation
+7. POST /participations (avec code_acces) → participer avec code
+```
+
+---
+
+## 🔍 Fonctionnalités Swagger UI
+
+### Dans chaque endpoint :
+- **Try it out** : Activer le mode test
+- **Parameters** : Voir/modifier les paramètres (IDs cryptés automatiquement gérés !)
+- **Request body** : Exemples pré-remplis
+- **Execute** : Lancer la requête
+- **Response** : Voir la réponse en temps réel
+
+### Exemples fournis :
+- ✅ Tous les IDs sont en format crypté (ex: "VAG7e3Qj")
+- ✅ Exemples de réponses d'erreur (400, 404, etc.)
+- ✅ Cas multiples documentés (avec/sans auth, etc.)
+
+---
+
+## 📝 Points importants
+
+### 🔐 Sécurité des IDs (HashIds)
+- **Frontend ne fait AUCUNE logique de cryptage**
+- Tous les IDs reçus sont déjà cryptés
+- Tous les IDs envoyés sont automatiquement décodés
+- Aucune bibliothèque crypto côté frontend nécessaire !
+
+### 🍪 Authentification
+- Cookies httpOnly automatiques
+- Pas besoin de gérer le token manuellement
+- Swagger UI gère les cookies automatiquement
+
+### ⚠️ Erreurs courantes
+
+**Erreur : "Ce quiz n'est pas encore disponible"**
+```
+Solution: Utiliser PATCH /quizzes/{id}/publier pour publier le quiz
+```
+
+**Erreur : "Code d'invitation invalide"**
+```
+Solution: Vérifier que le code est bien celui reçu par email
+```
+
+**Erreur : 401 Unauthorized**
+```
+Solution: Se connecter d'abord avec POST /utilisateurs/login
+```
+
+---
+
+## 🎯 Prochaines étapes
+
+1. **Ouvrir Swagger UI** : http://localhost:3000/api-docs
+2. **Tester l'inscription** : `POST /utilisateurs/register`
+3. **Tester la connexion** : `POST /utilisateurs/login`
+4. **Créer un quiz** : `POST /quizzes`
+5. **PUBLIER le quiz** : `PATCH /quizzes/{id}/publier` ⭐
+6. **Tester participation** : `POST /participations/quiz/{quiz_id}`
+
+---
+
+## 💡 Alternatives à Swagger UI
+
+Si vous préférez d'autres outils :
+
+### Postman
+1. Importer : http://localhost:3000/api-docs.json
+2. Collection automatiquement créée !
+
+### Insomnia
+1. Importer OpenAPI 3.0
+2. URL : http://localhost:3000/api-docs.json
+
+### ReDoc (documentation read-only)
+```bash
+npx redoc-cli serve swagger.yaml
+```
+
+---
+
+Bon test ! 🚀

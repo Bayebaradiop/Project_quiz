@@ -23,30 +23,38 @@ export class ParticipationService {
     data: DemarrerParticipationInput,
     utilisateur_id?: number
   ): Promise<Participation> {
+    let quiz_id = data.quiz_id;
+    let invitation: any = null;
+
+    // Si code d'accès fourni, récupérer l'invitation et le quiz_id
+    if (data.code_acces) {
+      invitation = await invitationRepository.findByCodeAcces(data.code_acces);
+      if (!invitation) {
+        throw new Error(ERROR_MESSAGES.INVALID_CODE);
+      }
+      // Accepter les statuts "en_attente" et "accepte" (après validation)
+      if (invitation.statut !== 'en_attente' && invitation.statut !== 'accepte') {
+        throw new Error('Cette invitation n\'est plus valide');
+      }
+      if (new Date() > invitation.date_expiration) {
+        throw new Error(ERROR_MESSAGES.INVITATION_EXPIRED);
+      }
+      quiz_id = invitation.quiz_id;
+    }
+
+    if (!quiz_id) {
+      throw new Error('ID du quiz manquant');
+    }
+
     // Vérifier que le quiz existe
-    const quiz = await quizRepository.findById(data.quiz_id);
+    const quiz = await quizRepository.findById(quiz_id);
     if (!quiz) {
       throw new Error(ERROR_MESSAGES.QUIZ_NOT_FOUND);
     }
 
     // Si le quiz n'est pas publié, vérifier les permissions
     if (quiz.statut !== 'publie') {
-      // Si code d'accès fourni, vérifier l'invitation
-      if (data.code_acces) {
-        const invitation = await invitationRepository.findByCodeAcces(data.code_acces);
-        if (!invitation) {
-          throw new Error(ERROR_MESSAGES.INVALID_CODE);
-        }
-        if (invitation.quiz_id !== data.quiz_id) {
-          throw new Error('Code d\'accès invalide pour ce quiz');
-        }
-        if (invitation.statut !== 'en_attente') {
-          throw new Error('Cette invitation n\'est plus valide');
-        }
-        if (new Date() > invitation.date_expiration) {
-          throw new Error(ERROR_MESSAGES.INVITATION_EXPIRED);
-        }
-      } else {
+      if (!data.code_acces) {
         // Quiz non publié sans code d'accès
         throw new Error('Ce quiz nécessite un code d\'accès');
       }
@@ -55,7 +63,7 @@ export class ParticipationService {
     // Vérifier si l'utilisateur a déjà participé
     if (utilisateur_id) {
       const hasParticipated = await participationRepository.hasUserParticipated(
-        data.quiz_id,
+        quiz_id,
         utilisateur_id
       );
       if (hasParticipated) {
@@ -63,7 +71,7 @@ export class ParticipationService {
       }
     } else if (data.email_participant) {
       const hasParticipated = await participationRepository.hasAnonymousParticipated(
-        data.quiz_id,
+        quiz_id,
         data.email_participant
       );
       if (hasParticipated) {
@@ -74,6 +82,7 @@ export class ParticipationService {
     // Créer la participation
     const participation = await participationRepository.create({
       ...data,
+      quiz_id,
       utilisateur_id: utilisateur_id || undefined,
     });
 
@@ -114,6 +123,62 @@ export class ParticipationService {
   }
 
   /**
+   * Participer à un quiz public depuis la liste (par ID)
+   */
+  async participerQuizPublic(
+    quiz_id: number,
+    email_participant?: string,
+    nom_participant?: string,
+    utilisateur_id?: number
+  ): Promise<{ participation: Participation; quiz: any; questions: any[] }> {
+    // Vérifier que le quiz existe
+    const quiz = await quizRepository.findById(quiz_id);
+    if (!quiz) {
+      throw new Error(ERROR_MESSAGES.QUIZ_NOT_FOUND);
+    }
+
+    // Vérifier que le quiz est publié
+    if (quiz.statut !== 'publie') {
+      throw new Error('Ce quiz n\'est pas encore disponible');
+    }
+
+    // Démarrer la participation
+    const participation = await this.demarrerParticipation(
+      {
+        quiz_id: quiz.id,
+        email_participant,
+        nom_participant,
+      },
+      utilisateur_id
+    );
+
+    // Récupérer les questions avec les choix de réponses
+    const questions = await questionRepository.findByQuizId(quiz_id);
+
+    return { 
+      participation,
+      quiz: {
+        id: quiz.id,
+        titre: quiz.titre,
+        description: quiz.description,
+        nb_questions: questions.length,
+        duree_totale: questions.reduce((sum, q) => sum + (q.duree || 0), 0),
+      },
+      questions: questions.map(q => ({
+        id: q.id,
+        texte: q.texte,
+        duree: q.duree,
+        ordre: q.ordre,
+        choix_reponses: (q as any).choix_reponses?.map((c: any) => ({
+          id: c.id,
+          texte: c.texte,
+          ordre: c.ordre,
+        })) || [],
+      })),
+    };
+  }
+
+  /**
    * Soumettre une réponse
    */
   async soumettreReponse(data: SoumettreReponseInput): Promise<void> {
@@ -144,10 +209,10 @@ export class ParticipationService {
     let est_correcte = false;
     let points_obtenus = 0;
 
-    if (data.choix_reponse_id) {
+    if (data.reponse_id) {
       // Réponse à choix multiple - vérifier si le choix est correct
       const choixSelectionne = question.choix_reponses?.find(
-        (c: any) => c.id === data.choix_reponse_id
+        (c: any) => c.id === data.reponse_id
       );
       
       if (!choixSelectionne) {
@@ -172,7 +237,7 @@ export class ParticipationService {
       await participationRepository.updateReponse({
         participation_id: data.participation_id,
         question_id: data.question_id,
-        ...(data.choix_reponse_id && { choix_reponse_id: data.choix_reponse_id }),
+        ...(data.reponse_id && { choix_reponse_id: data.reponse_id }),
         ...(data.texte_reponse && { texte_reponse: data.texte_reponse }),
         ...(data.temps_reponse && { temps_reponse: data.temps_reponse }),
         est_correcte,
