@@ -1,3 +1,15 @@
+## Génération automatique de questions de quiz via l'IA
+
+Pour générer des questions automatiquement avec l'API OpenAI, utilisez le endpoint :
+
+```
+curl -X POST http://localhost:3000/api/v1/quizzes/{quizId}/generate-questions \
+   -H "Content-Type: application/json" \
+   -d '{"prompt": "Génère 5 questions à choix multiples sur le thème de la biologie."}'
+```
+
+Remplacez `{quizId}` par l'ID du quiz cible.
+La réponse contiendra les questions générées par l'IA.
 # QuizLab - Backend API
 
 API REST pour système de quiz avec questions à choix multiples (QCM).

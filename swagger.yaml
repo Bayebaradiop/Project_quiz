@@ -1008,76 +1008,84 @@ paths:
                     message: "Ce code d'invitation a expiré"
 
   # ==================== QUESTIONS ====================
-  /quizzes/{quizId}/questions:
-    post:
-      tags: [Questions]
-      summary: Ajouter une question à un quiz
-      description: |
-        **L'ID du quiz et les IDs retournés sont tous cryptés!**
-      security:
-        - cookieAuth: []
-      parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/HashId'
-          example: "VAG7e3Qj"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [texte, duree, ordre, choix_reponses]
-              properties:
-                texte:
-                  type: string
-                  minLength: 10
-                  example: "Quelle est la différence entre let et var ?"
-                duree:
-                  type: integer
-                  description: Durée en secondes
-                  example: 30
-                ordre:
-                  type: integer
-                  example: 1
-                choix_reponses:
-                  type: array
-                  minItems: 2
-                  items:
-                    type: object
-                    required: [texte, est_correcte, ordre]
-                    properties:
-                      texte:
-                        type: string
-                        example: "let a une portée de bloc"
-                      est_correcte:
-                        type: boolean
-                        example: true
-                      ordre:
-                        type: integer
-                        example: 1
-      responses:
-        '201':
-          description: Question créée avec IDs cryptés
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  data:
-                    $ref: '#/components/schemas/Question'
-              example:
-                success: true
-                data:
-                  id: "w5PXz1KX"
-                  texte: "Quelle est la différence entre let et var ?"
-                  choix:
-                    - id: "Xk12dYPg"
-                      texte: "let a une portée de bloc"
+  
+  # 🚫 ENDPOINT MANUEL DÉSACTIVÉ - Utiliser la génération par IA à la place
+  # /quizzes/{quizId}/questions (POST) a été remplacé par /quizzes/{quizId}/generate-questions
+  # Pour créer des questions, utilisez maintenant l'endpoint d'Intelligence Artificielle
+  
+  # /quizzes/{quizId}/questions:
+  #   post:
+  #     tags: [Questions]
+  #     summary: ⚠️ DÉSACTIVÉ - Ajouter une question manuellement à un quiz
+  #     description: |
+  #       ⚠️ CET ENDPOINT EST DÉSACTIVÉ
+  #       
+  #       Utilisez à la place: POST /quizzes/{quizId}/generate-questions
+  #       La génération par IA utilise la même logique de validation et de création.
+  #     security:
+  #       - cookieAuth: []
+  #     parameters:
+  #       - name: quizId
+  #         in: path
+  #         required: true
+  #         schema:
+  #           $ref: '#/components/schemas/HashId'
+  #         example: "VAG7e3Qj"
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             required: [texte, duree, ordre, choix_reponses]
+  #             properties:
+  #               texte:
+  #                 type: string
+  #                 minLength: 10
+  #                 example: "Quelle est la différence entre let et var ?"
+  #               duree:
+  #                 type: integer
+  #                 description: Durée en secondes
+  #                 example: 30
+  #               ordre:
+  #                 type: integer
+  #                 example: 1
+  #               choix_reponses:
+  #                 type: array
+  #                 minItems: 2
+  #                 items:
+  #                   type: object
+  #                   required: [texte, est_correcte, ordre]
+  #                   properties:
+  #                     texte:
+  #                       type: string
+  #                       example: "let a une portée de bloc"
+  #                     est_correcte:
+  #                       type: boolean
+  #                       example: true
+  #                     ordre:
+  #                       type: integer
+  #                       example: 1
+  #     responses:
+  #       '201':
+  #         description: Question créée avec IDs cryptés
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 success:
+  #                   type: boolean
+  #                 data:
+  #                   $ref: '#/components/schemas/Question'
+  #             example:
+  #               success: true
+  #               data:
+  #                 id: "w5PXz1KX"
+  #                 texte: "Quelle est la différence entre let et var ?"
+  #                 choix:
+  #                   - id: "Xk12dYPg"
+  #                     texte: "let a une portée de bloc"
 
   /quizzes/{id}/questions:
     get:
@@ -1511,3 +1519,584 @@ paths:
                                   type: boolean
                                 points_obtenus:
                                   type: integer
+
+  # ==================== GÉNÉRATION IA ====================
+  /quizzes/{quizId}/generate-questions:
+    post:
+      tags: [Intelligence Artificielle]
+      summary: "🤖 Générer des questions via IA (texte libre)"
+      description: |
+        ## 🚀 Génération automatique de questions par IA + Création en base de données
+        
+        Génère des questions de quiz à partir d'un simple prompt textuel **ET les crée automatiquement en base de données**.
+        
+        **🔥 Powered by Groq (Llama 3.3 70B)**
+        - Ultra rapide (~2 secondes)
+        - Questions de haute qualité pédagogique
+        - Explications détaillées
+        
+        **✅ Système de fallback intelligent :**
+        1. Groq API (priorité 1 - recommandé)
+        2. Hugging Face (fallback)
+        3. OpenAI (fallback)
+        4. Générateur local (dernier recours)
+        
+        **📝 Traitement automatique :**
+        1. Génération via IA selon le prompt
+        2. Parsing et validation du format JSON
+        3. Mapping automatique vers le format de votre base de données
+        4. Validation avec le même schéma que l'ajout manuel (`createQuestionSchema`)
+        5. **Création automatique de chaque question en base avec `QuestionService`**
+        6. Retour des questions créées (avec IDs cryptés)
+        
+        **⚙️ Format attendu par l'IA (automatiquement normalisé) :**
+        - `texte` ou `question` → texte de la question
+        - `duree` ou `duration` → durée en secondes (défaut: 30)
+        - `ordre` → ordre de la question (auto-incrémenté)
+        - `choix_reponses` ou `options` → tableau de choix
+          - Chaque choix : `texte`, `est_correcte`, `ordre`
+        - `correct_answer` → texte de la bonne réponse (mapping automatique)
+        
+        **✅ Avantages :**
+        - Même logique que l'ajout manuel de questions
+        - Validation stricte (min 2 choix, au moins 1 correct)
+        - Questions immédiatement disponibles dans le quiz
+        - Format de réponse identique à `POST /quizzes/:quizId/questions`
+        
+        **Cas d'usage :**
+        - Création rapide de quiz complet
+        - Import en masse de questions
+        - Génération contextuelle (avec ou sans document)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/HashId'
+          example: "Qp3ndGMw"
+          description: ID crypté du quiz
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt]
+              properties:
+                prompt:
+                  type: string
+                  description: Instructions pour la génération des questions
+                  example: "Génère 5 questions à choix multiples sur le thème de la photosynthèse en biologie."
+      responses:
+        '201':
+          description: Questions générées ET créées en base de données avec succès
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    description: Format pour UNE seule question générée (identique à la création manuelle)
+                    properties:
+                      success:
+                        type: boolean
+                        example: true
+                      message:
+                        type: string
+                        example: "Question créée avec succès"
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            $ref: '#/components/schemas/HashId'
+                          texte:
+                            type: string
+                            example: "Qu'est-ce que la photosynthèse ?"
+                          duree:
+                            type: integer
+                            example: 30
+                          ordre:
+                            type: integer
+                            example: 1
+                          quiz_id:
+                            $ref: '#/components/schemas/HashId'
+                          createdAt:
+                            type: object
+                          updatedAt:
+                            type: object
+                          deletedAt:
+                            type: null
+                          choix_reponses:
+                            type: array
+                            description: "Chaque question a plusieurs réponses, UNE SEULE est correcte (est_correcte: true)"
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  $ref: '#/components/schemas/HashId'
+                                question_id:
+                                  $ref: '#/components/schemas/HashId'
+                                texte:
+                                  type: string
+                                  example: "Un processus biologique"
+                                est_correcte:
+                                  type: boolean
+                                  description: "true = bonne réponse, false = mauvaise réponse. UNE SEULE réponse a est_correcte: true"
+                                  example: true
+                                ordre:
+                                  type: integer
+                                  example: 1
+                                createdAt:
+                                  type: object
+                                updatedAt:
+                                  type: object
+                  - type: object
+                    description: Format pour PLUSIEURS questions générées
+                    properties:
+                      success:
+                        type: boolean
+                        example: true
+                      message:
+                        type: string
+                        example: "3 questions créées avec succès"
+                      data:
+                        type: array
+                        description: Tableau des questions créées (même structure que ci-dessus pour chaque question)
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              $ref: '#/components/schemas/HashId'
+                            texte:
+                              type: string
+                            duree:
+                              type: integer
+                            ordre:
+                              type: integer
+                            quiz_id:
+                              $ref: '#/components/schemas/HashId'
+                            choix_reponses:
+                              type: array
+                              items:
+                                type: object
+              examples:
+                single_question:
+                  summary: "Exemple: 1 question générée"
+                  value:
+                    success: true
+                    message: "Question créée avec succès"
+                    data:
+                      id: "0QGN2Ggm"
+                      texte: "Quel est l'objectif principal de l'utilisation des namespaces en PHP ?"
+                      duree: 30
+                      ordre: 1
+                      quiz_id: "4v3Q41LE"
+                      createdAt: {}
+                      updatedAt: {}
+                      deletedAt: null
+                      choix_reponses:
+                        - id: "dA1akeP7"
+                          question_id: "0QGN2Ggm"
+                          texte: "Définir des constantes globales"
+                          est_correcte: false
+                          ordre: 1
+                          createdAt: {}
+                          updatedAt: {}
+                        - id: "DbGOyd3d"
+                          question_id: "0QGN2Ggm"
+                          texte: "Organiser et éviter les conflits de noms entre classes et fonctions"
+                          est_correcte: true
+                          ordre: 2
+                          createdAt: {}
+                          updatedAt: {}
+                        - id: "aO1oaYP7"
+                          question_id: "0QGN2Ggm"
+                          texte: "Déclarer des variables statiques"
+                          est_correcte: false
+                          ordre: 3
+                          createdAt: {}
+                          updatedAt: {}
+                        - id: "Rb3Wp9P9"
+                          question_id: "0QGN2Ggm"
+                          texte: "Définir des interfaces pour les classes"
+                          est_correcte: false
+                          ordre: 4
+                          createdAt: {}
+                          updatedAt: {}
+                multiple_questions:
+                  summary: "Exemple: Plusieurs questions générées"
+                  value:
+                    success: true
+                    message: "3 questions créées avec succès"
+                    data:
+                      - id: "9x360G5g"
+                        texte: "Qu'est-ce que la photosynthèse ?"
+                        duree: 30
+                        ordre: 1
+                        quiz_id: "Qp3ndGMw"
+                        createdAt: {}
+                        updatedAt: {}
+                        deletedAt: null
+                        choix_reponses:
+                          - id: "4JGR4Q36"
+                            question_id: "9x360G5g"
+                            texte: "Un processus biologique permettant de convertir l'énergie lumineuse"
+                            est_correcte: true
+                            ordre: 1
+                            createdAt: {}
+                            updatedAt: {}
+                          - id: "6bPLmwGO"
+                            question_id: "9x360G5g"
+                            texte: "Une réaction chimique simple"
+                            est_correcte: false
+                            ordre: 2
+                            createdAt: {}
+                            updatedAt: {}
+                          - id: "8kTRnP2L"
+                            question_id: "9x360G5g"
+                            texte: "Un phénomène physique"
+                            est_correcte: false
+                            ordre: 3
+                            createdAt: {}
+                            updatedAt: {}
+                          - id: "2mNQpK9Z"
+                            question_id: "9x360G5g"
+                            texte: "Une transformation géologique"
+                            est_correcte: false
+                            ordre: 4
+                            createdAt: {}
+                            updatedAt: {}
+                      - id: "7yR52H3k"
+                        texte: "Quelle est l'équation de la photosynthèse ?"
+                        duree: 30
+                        ordre: 2
+                        quiz_id: "Qp3ndGMw"
+                        createdAt: {}
+                        updatedAt: {}
+                        deletedAt: null
+                        choix_reponses:
+                          - id: "5nBMqW8P"
+                            question_id: "7yR52H3k"
+                            texte: "6 CO2 + 6 H2O + lumière → C6H12O6 + 6 O2"
+                            est_correcte: true
+                            ordre: 1
+                            createdAt: {}
+                            updatedAt: {}
+                          - id: "3pLKmR7N"
+                            question_id: "7yR52H3k"
+                            texte: "C6H12O6 + 6 O2 → 6 CO2 + 6 H2O"
+                            est_correcte: false
+                            ordre: 2
+                            createdAt: {}
+                            updatedAt: {}
+                          - id: "9qXTnV4M"
+                            question_id: "7yR52H3k"
+                            texte: "CO2 + H2O → O2"
+                            est_correcte: false
+                            ordre: 3
+                            createdAt: {}
+                            updatedAt: {}
+                          - id: "1rYZpS6L"
+                            question_id: "7yR52H3k"
+                            texte: "H2O → O2 + H2"
+                            est_correcte: false
+                            ordre: 4
+                            createdAt: {}
+                            updatedAt: {}
+        '400':
+          description: Erreur de validation ou prompt manquant
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Erreur de validation sur une question générée"
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                        message:
+                          type: string
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Erreur lors de la génération
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Erreur lors de la génération des questions."
+                  error:
+                    type: string
+                    example: "Request failed with status code 429"
+
+  /quizzes/{quizId}/generate-from-document:
+    post:
+      tags: [Intelligence Artificielle]
+      summary: "📄 Générer des questions depuis un document"
+      description: |
+        ## 📤 Upload de documents pour génération contextuelle + Création en base de données
+        
+        Upload un document (PDF, Word, Image) et génère automatiquement des questions basées sur son contenu **puis les crée en base de données**.
+        
+        **📁 Formats supportés :**
+        - PDF (`.pdf`)
+        - Word (`.docx`)
+        - Images (`.jpg`, `.jpeg`, `.png`) - avec OCR
+        
+        **🔧 Fonctionnement :**
+        1. Upload du fichier (max 10 MB)
+        2. Extraction automatique du texte (OCR pour images)
+        3. Génération de questions via Groq AI avec contexte du document
+        4. **Parsing et validation avec `createQuestionSchema`**
+        5. **Création automatique en base via `QuestionService`**
+        6. Nettoyage automatique du fichier temporaire
+        7. Retour des questions créées (format identique aux autres endpoints)
+        
+        **💡 OCR pour images :**
+        - Support français + anglais (Tesseract.js)
+        - Extraction automatique du texte visible
+        - Fonctionne avec JPG, JPEG, PNG
+        
+        **✅ Avantages :**
+        - Questions contextuelles basées sur le contenu réel du document
+        - Même validation et format que les autres méthodes de création
+        - Questions immédiatement disponibles dans le quiz
+        - Métadonnées du document incluses dans la réponse
+        
+        **Cas d'usage :**
+        - Créer un quiz depuis un cours PDF
+        - Générer des questions depuis des slides PowerPoint (exportés en images)
+        - Quiz basé sur des documents de formation
+        - Évaluation automatique depuis des supports pédagogiques
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/HashId'
+          example: "Qp3ndGMw"
+          description: ID crypté du quiz
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [document]
+              properties:
+                document:
+                  type: string
+                  format: binary
+                  description: Fichier à uploader (PDF, Word, Image)
+                numQuestions:
+                  type: integer
+                  default: 5
+                  description: Nombre de questions à générer
+                  example: 5
+                difficulty:
+                  type: string
+                  default: "moyen"
+                  enum: [facile, moyen, difficile]
+                  description: Niveau de difficulté des questions
+                  example: "moyen"
+      responses:
+        '201':
+          description: Questions générées ET créées en base de données depuis le document
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    description: Format pour UNE seule question générée
+                    properties:
+                      success:
+                        type: boolean
+                        example: true
+                      message:
+                        type: string
+                        example: "Question créée avec succès"
+                      data:
+                        type: object
+                        description: Question créée (format identique à la création manuelle et par IA)
+                      metadata:
+                        type: object
+                        properties:
+                          documentName:
+                            type: string
+                            example: "cours-biologie.pdf"
+                          documentType:
+                            type: string
+                            example: "application/pdf"
+                          extractedChars:
+                            type: integer
+                            example: 2543
+                  - type: object
+                    description: Format pour PLUSIEURS questions générées
+                    properties:
+                      success:
+                        type: boolean
+                        example: true
+                      message:
+                        type: string
+                        example: "3 questions créées avec succès"
+                      data:
+                        type: array
+                        description: Tableau des questions créées
+                        items:
+                          type: object
+                      metadata:
+                        type: object
+                        properties:
+                          documentName:
+                            type: string
+                            example: "cours-biologie.pdf"
+                          documentType:
+                            type: string
+                            example: "application/pdf"
+                          extractedChars:
+                            type: integer
+                            example: 2543
+                          numQuestionsRequested:
+                            type: integer
+                            example: 5
+              examples:
+                single_question:
+                  summary: "Exemple: 1 question depuis document"
+                  value:
+                    success: true
+                    message: "Question créée avec succès"
+                    data:
+                      id: "XV1Yq1Jn"
+                      texte: "Selon le document, qu'est-ce que la photosynthèse ?"
+                      duree: 30
+                      ordre: 1
+                      quiz_id: "Qp3ndGMw"
+                      createdAt: {}
+                      updatedAt: {}
+                      deletedAt: null
+                      choix_reponses:
+                        - id: "ayPELa3O"
+                          question_id: "XV1Yq1Jn"
+                          texte: "Un processus de conversion de lumière en énergie chimique"
+                          est_correcte: true
+                          ordre: 1
+                          createdAt: {}
+                          updatedAt: {}
+                        - id: "bkPx4lPJ"
+                          question_id: "XV1Yq1Jn"
+                          texte: "Un processus de respiration cellulaire"
+                          est_correcte: false
+                          ordre: 2
+                          createdAt: {}
+                          updatedAt: {}
+                        - id: "KD3vXpGE"
+                          question_id: "XV1Yq1Jn"
+                          texte: "Un processus de digestion"
+                          est_correcte: false
+                          ordre: 3
+                          createdAt: {}
+                          updatedAt: {}
+                    metadata:
+                      documentName: "cours-photosynthese.pdf"
+                      documentType: "application/pdf"
+                      extractedChars: 1847
+                multiple_questions:
+                  summary: "Exemple: Plusieurs questions depuis document"
+                  value:
+                    success: true
+                    message: "3 questions créées avec succès"
+                    data:
+                      - id: "9x360G5g"
+                        texte: "Selon le document, quelle est la formule de la photosynthèse ?"
+                        duree: 30
+                        ordre: 1
+                        quiz_id: "Qp3ndGMw"
+                        choix_reponses:
+                          - id: "4JGR4Q36"
+                            question_id: "9x360G5g"
+                            texte: "6 CO2 + 6 H2O + lumière → C6H12O6 + 6 O2"
+                            est_correcte: true
+                            ordre: 1
+                          - id: "6bPLmwGO"
+                            question_id: "9x360G5g"
+                            texte: "C6H12O6 + 6 O2 → 6 CO2 + 6 H2O"
+                            est_correcte: false
+                            ordre: 2
+                      - id: "7yR52H3k"
+                        texte: "Où se déroule la photosynthèse selon le document ?"
+                        duree: 30
+                        ordre: 2
+                        quiz_id: "Qp3ndGMw"
+                        choix_reponses:
+                          - id: "5nBMqW8P"
+                            question_id: "7yR52H3k"
+                            texte: "Dans les chloroplastes"
+                            est_correcte: true
+                            ordre: 1
+                          - id: "3pLKmR7N"
+                            question_id: "7yR52H3k"
+                            texte: "Dans les mitochondries"
+                            est_correcte: false
+                            ordre: 2
+                    metadata:
+                      documentName: "cours-photosynthese.pdf"
+                      documentType: "application/pdf"
+                      extractedChars: 1847
+                      numQuestionsRequested: 3
+        '400':
+          description: Fichier invalide ou manquant
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Aucun fichier fourni. Veuillez uploader un document."
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Erreur lors de l'extraction ou génération
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Erreur lors de la génération des questions depuis le document."
+                  error:
+                    type: string
+
