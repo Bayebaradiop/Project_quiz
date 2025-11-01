@@ -142,20 +142,66 @@ Génère des questions pertinentes qui testent la compréhension du contenu ci-d
       for (let j = 0; j < opts.length; j++) {
         const opt = opts[j];
         let estCorrecte = opt.est_correcte ?? opt.correct ?? opt.is_correct ?? false;
-        
-        if (!estCorrecte && item.correct_answer) {
-          const optText = (opt.texte || opt.text || '').trim().toLowerCase();
-          const correctText = item.correct_answer.trim().toLowerCase();
-          if (optText === correctText || optText.includes(correctText) || correctText.includes(optText)) {
-            estCorrecte = true;
-          }
-        }
 
         mapped.choix_reponses.push({
           texte: opt.texte || opt.text || opt.option || String(opt),
           est_correcte: estCorrecte,
           ordre: opt.ordre || (j + 1)
         });
+      }
+
+      // S'assurer qu'UNE SEULE réponse est correcte
+      const correctCount = mapped.choix_reponses.filter((cOpt: any) => cOpt.est_correcte).length;
+      
+      if (correctCount !== 1 && item.correct_answer) {
+        // Reset all to false first
+        mapped.choix_reponses.forEach((cOpt: any) => { cOpt.est_correcte = false; });
+        
+        const ca = String(item.correct_answer).trim().toLowerCase();
+        
+        // Try exact match first
+        let found = false;
+        for (const cOpt of mapped.choix_reponses) {
+          const optText = String(cOpt.texte).trim().toLowerCase();
+          if (optText === ca) {
+            cOpt.est_correcte = true;
+            found = true;
+            break;
+          }
+        }
+        
+        // If not found, try partial match
+        if (!found) {
+          for (const cOpt of mapped.choix_reponses) {
+            const optText = String(cOpt.texte).trim().toLowerCase();
+            if (optText.includes(ca) || ca.includes(optText)) {
+              cOpt.est_correcte = true;
+              found = true;
+              break;
+            }
+          }
+        }
+        
+        // If still not found, mark first option as correct (fallback)
+        if (!found && mapped.choix_reponses.length > 0) {
+          console.warn('[DocumentQuiz] Aucune réponse correcte détectée, marquage de la première par défaut');
+          mapped.choix_reponses[0].est_correcte = true;
+        }
+      } else if (correctCount > 1) {
+        // If multiple correct, keep only the first one
+        console.warn('[DocumentQuiz] Plusieurs réponses correctes détectées, conservation de la première seulement');
+        let firstFound = false;
+        mapped.choix_reponses.forEach((cOpt: any) => {
+          if (cOpt.est_correcte && !firstFound) {
+            firstFound = true;
+          } else if (cOpt.est_correcte) {
+            cOpt.est_correcte = false;
+          }
+        });
+      } else if (correctCount === 0 && mapped.choix_reponses.length > 0) {
+        // If none correct, mark first as correct (fallback)
+        console.warn('[DocumentQuiz] Aucune réponse correcte, marquage de la première par défaut');
+        mapped.choix_reponses[0].est_correcte = true;
       }
 
       try {

@@ -15,8 +15,8 @@ const questionController = new QuestionController();
 quizzesRoutes.get('/mes-quiz', authMiddleware, quizController.getAllByCreateur); // 🔒 Mes quiz avec TOUTES les infos
 quizzesRoutes.post('/mes-quiz', authMiddleware, quizController.create); // 🔒 Créer quiz
 
-// 🚫 ENDPOINT MANUEL DÉSACTIVÉ - Utiliser la génération par IA à la place
-// quizzesRoutes.post('/:quizId/questions', authMiddleware, hashIdMiddleware('quizId'), questionController.create); // 🔒 Ajouter question manuelle
+// � Création manuelle de questions (disponible en parallèle de l'IA)
+quizzesRoutes.post('/:quizId/questions', authMiddleware, hashIdMiddleware('quizId'), questionController.create); // 🔒 Ajouter question manuellement
 
 quizzesRoutes.get('/:quizId/questions/next-ordre', authMiddleware, hashIdMiddleware('quizId'), questionController.getNextOrdre); // 🔒 Ordre suivant
 quizzesRoutes.put('/:id', authMiddleware, hashIdMiddleware('id'), quizController.update); // 🔒 Modifier quiz

@@ -1009,83 +1009,212 @@ paths:
 
   # ==================== QUESTIONS ====================
   
-  # 🚫 ENDPOINT MANUEL DÉSACTIVÉ - Utiliser la génération par IA à la place
-  # /quizzes/{quizId}/questions (POST) a été remplacé par /quizzes/{quizId}/generate-questions
-  # Pour créer des questions, utilisez maintenant l'endpoint d'Intelligence Artificielle
-  
-  # /quizzes/{quizId}/questions:
-  #   post:
-  #     tags: [Questions]
-  #     summary: ⚠️ DÉSACTIVÉ - Ajouter une question manuellement à un quiz
-  #     description: |
-  #       ⚠️ CET ENDPOINT EST DÉSACTIVÉ
-  #       
-  #       Utilisez à la place: POST /quizzes/{quizId}/generate-questions
-  #       La génération par IA utilise la même logique de validation et de création.
-  #     security:
-  #       - cookieAuth: []
-  #     parameters:
-  #       - name: quizId
-  #         in: path
-  #         required: true
-  #         schema:
-  #           $ref: '#/components/schemas/HashId'
-  #         example: "VAG7e3Qj"
-  #     requestBody:
-  #       required: true
-  #       content:
-  #         application/json:
-  #           schema:
-  #             type: object
-  #             required: [texte, duree, ordre, choix_reponses]
-  #             properties:
-  #               texte:
-  #                 type: string
-  #                 minLength: 10
-  #                 example: "Quelle est la différence entre let et var ?"
-  #               duree:
-  #                 type: integer
-  #                 description: Durée en secondes
-  #                 example: 30
-  #               ordre:
-  #                 type: integer
-  #                 example: 1
-  #               choix_reponses:
-  #                 type: array
-  #                 minItems: 2
-  #                 items:
-  #                   type: object
-  #                   required: [texte, est_correcte, ordre]
-  #                   properties:
-  #                     texte:
-  #                       type: string
-  #                       example: "let a une portée de bloc"
-  #                     est_correcte:
-  #                       type: boolean
-  #                       example: true
-  #                     ordre:
-  #                       type: integer
-  #                       example: 1
-  #     responses:
-  #       '201':
-  #         description: Question créée avec IDs cryptés
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: object
-  #               properties:
-  #                 success:
-  #                   type: boolean
-  #                 data:
-  #                   $ref: '#/components/schemas/Question'
-  #             example:
-  #               success: true
-  #               data:
-  #                 id: "w5PXz1KX"
-  #                 texte: "Quelle est la différence entre let et var ?"
-  #                 choix:
-  #                   - id: "Xk12dYPg"
-  #                     texte: "let a une portée de bloc"
+  /quizzes/{quizId}/questions:
+    post:
+      tags: [Questions]
+      summary: 📝 Ajouter une question manuellement à un quiz
+      description: |
+        **Création manuelle de question avec choix de réponses**
+        
+        Cet endpoint permet de créer des questions manuellement (alternative à la génération par IA).
+        
+        **Validation stricte :**
+        - Texte : minimum 10 caractères
+        - Choix de réponses : minimum 2 options
+        - Au moins UNE réponse doit avoir `est_correcte: true`
+        - Tous les IDs retournés sont cryptés (HashIds)
+        
+        **💡 Alternatives disponibles :**
+        - `POST /quizzes/{quizId}/generate-questions` - Génération par IA depuis un prompt
+        - `POST /quizzes/{quizId}/generate-from-document` - Génération depuis un document
+        
+        **Format de réponse identique** à tous les endpoints de création.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/HashId'
+          example: "VAG7e3Qj"
+          description: ID crypté du quiz
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [texte, duree, ordre, choix_reponses]
+              properties:
+                texte:
+                  type: string
+                  minLength: 10
+                  maxLength: 500
+                  example: "Quelle est la différence entre let et var ?"
+                  description: Texte de la question (10-500 caractères)
+                duree:
+                  type: integer
+                  minimum: 1
+                  description: Durée en secondes pour répondre
+                  example: 30
+                ordre:
+                  type: integer
+                  minimum: 1
+                  description: Ordre d'affichage de la question dans le quiz
+                  example: 1
+                choix_reponses:
+                  type: array
+                  minItems: 2
+                  description: Liste des choix de réponses (minimum 2, au moins 1 correcte)
+                  items:
+                    type: object
+                    required: [texte, est_correcte, ordre]
+                    properties:
+                      texte:
+                        type: string
+                        minLength: 1
+                        example: "let a une portée de bloc"
+                        description: Texte du choix de réponse
+                      est_correcte:
+                        type: boolean
+                        example: true
+                        description: "true si c'est la bonne réponse, false sinon"
+                      ordre:
+                        type: integer
+                        minimum: 1
+                        example: 1
+                        description: Ordre d'affichage du choix
+            example:
+              texte: "Quelle est la différence entre let et var ?"
+              duree: 30
+              ordre: 1
+              choix_reponses:
+                - texte: "let a une portée de bloc"
+                  est_correcte: true
+                  ordre: 1
+                - texte: "let a une portée globale"
+                  est_correcte: false
+                  ordre: 2
+                - texte: "var a une portée de bloc"
+                  est_correcte: false
+                  ordre: 3
+                - texte: "Il n'y a pas de différence"
+                  est_correcte: false
+                  ordre: 4
+      responses:
+        '201':
+          description: Question créée avec succès (IDs cryptés)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Question créée avec succès"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        $ref: '#/components/schemas/HashId'
+                      texte:
+                        type: string
+                      duree:
+                        type: integer
+                      ordre:
+                        type: integer
+                      quiz_id:
+                        $ref: '#/components/schemas/HashId'
+                      createdAt:
+                        type: object
+                      updatedAt:
+                        type: object
+                      deletedAt:
+                        type: null
+                      choix_reponses:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              $ref: '#/components/schemas/HashId'
+                            question_id:
+                              $ref: '#/components/schemas/HashId'
+                            texte:
+                              type: string
+                            est_correcte:
+                              type: boolean
+                            ordre:
+                              type: integer
+                            createdAt:
+                              type: object
+                            updatedAt:
+                              type: object
+              example:
+                success: true
+                message: "Question créée avec succès"
+                data:
+                  id: "w5PXz1KX"
+                  texte: "Quelle est la différence entre let et var ?"
+                  duree: 30
+                  ordre: 1
+                  quiz_id: "VAG7e3Qj"
+                  createdAt: {}
+                  updatedAt: {}
+                  deletedAt: null
+                  choix_reponses:
+                    - id: "Xk12dYPg"
+                      question_id: "w5PXz1KX"
+                      texte: "let a une portée de bloc"
+                      est_correcte: true
+                      ordre: 1
+                      createdAt: {}
+                      updatedAt: {}
+                    - id: "bR4zK8nL"
+                      question_id: "w5PXz1KX"
+                      texte: "let a une portée globale"
+                      est_correcte: false
+                      ordre: 2
+                      createdAt: {}
+                      updatedAt: {}
+        '400':
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Erreur de validation"
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                        message:
+                          type: string
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Quiz non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /quizzes/{id}/questions:
     get:

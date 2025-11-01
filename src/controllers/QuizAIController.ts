@@ -72,15 +72,58 @@ export const generateQuestionsHandler = async (c: Context) => {
         };
       });
 
-      // If none marked correct, try map from 'correct_answer' field
-      if (!mapped.choix_reponses.some((cOpt: any) => cOpt.est_correcte) && q.correct_answer) {
-        const ca = q.correct_answer;
+      // If none marked correct OR multiple marked correct, use 'correct_answer' field
+      const correctCount = mapped.choix_reponses.filter((cOpt: any) => cOpt.est_correcte).length;
+      
+      if (correctCount !== 1 && q.correct_answer) {
+        // Reset all to false first
+        mapped.choix_reponses.forEach((cOpt: any) => { cOpt.est_correcte = false; });
+        
+        const ca = String(q.correct_answer).trim().toLowerCase();
+        
+        // Try exact match first
+        let found = false;
         for (const cOpt of mapped.choix_reponses) {
-          if (cOpt.texte && ca && cOpt.texte.trim().toLowerCase() === String(ca).trim().toLowerCase()) {
+          const optText = String(cOpt.texte).trim().toLowerCase();
+          if (optText === ca) {
             cOpt.est_correcte = true;
+            found = true;
             break;
           }
         }
+        
+        // If not found, try partial match
+        if (!found) {
+          for (const cOpt of mapped.choix_reponses) {
+            const optText = String(cOpt.texte).trim().toLowerCase();
+            if (optText.includes(ca) || ca.includes(optText)) {
+              cOpt.est_correcte = true;
+              found = true;
+              break;
+            }
+          }
+        }
+        
+        // If still not found, mark first option as correct (fallback)
+        if (!found && mapped.choix_reponses.length > 0) {
+          console.warn('[QuizAI] Aucune réponse correcte détectée, marquage de la première par défaut');
+          mapped.choix_reponses[0].est_correcte = true;
+        }
+      } else if (correctCount > 1) {
+        // If multiple correct, keep only the first one
+        console.warn('[QuizAI] Plusieurs réponses correctes détectées, conservation de la première seulement');
+        let firstFound = false;
+        mapped.choix_reponses.forEach((cOpt: any) => {
+          if (cOpt.est_correcte && !firstFound) {
+            firstFound = true;
+          } else if (cOpt.est_correcte) {
+            cOpt.est_correcte = false;
+          }
+        });
+      } else if (correctCount === 0 && mapped.choix_reponses.length > 0) {
+        // If none correct, mark first as correct (fallback)
+        console.warn('[QuizAI] Aucune réponse correcte, marquage de la première par défaut');
+        mapped.choix_reponses[0].est_correcte = true;
       }
 
       // Validate with zod schema
