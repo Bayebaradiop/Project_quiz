@@ -19,7 +19,7 @@ app.use('*', logger());
 app.use('*', cors({
   origin: ENV.NODE_ENV === 'production'
     ? ['https://votredomaine.com']
-    : ['http://localhost:3000', 'http://localhost:5173'],
+    : ['http://localhost:3000', 'http://localhost:4200'],
   credentials: true,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowHeaders: ['Content-Type', 'Authorization'],

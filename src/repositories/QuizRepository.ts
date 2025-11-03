@@ -206,6 +206,11 @@ export class QuizRepository {
       include: {
         questions: {
           orderBy: { ordre: 'asc' },
+          include: {
+            choix_reponses: {
+              orderBy: { ordre: 'asc' },
+            },
+          },
         },
       },
     });
