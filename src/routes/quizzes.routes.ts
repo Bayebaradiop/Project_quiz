@@ -11,9 +11,9 @@ const quizController = new QuizController();
 const questionController = new QuestionController();
 
 // ==================== ENDPOINTS PROTÉGÉS (authentification requise) ====================
-// ⚠️ IMPORTANT: Routes spécifiques AVANT les routes dynamiques /:id
-quizzesRoutes.get('/mes-quiz', authMiddleware, quizController.getAllByCreateur); // 🔒 Mes quiz avec TOUTES les infos
-quizzesRoutes.post('/mes-quiz', authMiddleware, quizController.create); // 🔒 Créer quiz
+//  IMPORTANT: Routes spécifiques AVANT les routes dynamiques /:id
+quizzesRoutes.get('/mes-quiz', authMiddleware, quizController.getAllByCreateur); // Mes quiz avec TOUTES les infos
+quizzesRoutes.post('/mes-quiz', authMiddleware, quizController.create); //  Créer quiz
 
 // � Création manuelle de questions (disponible en parallèle de l'IA)
 quizzesRoutes.post('/:quizId/questions', authMiddleware, hashIdMiddleware('quizId'), questionController.create); // 🔒 Ajouter question manuellement

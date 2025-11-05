@@ -5,13 +5,7 @@ import { authMiddleware } from '../middleware/Auth';
 const utilisateurs = new Hono();
 const utilisateurController = new UtilisateurController();
 
-// Routes publiques
 
-/**
- * @route POST /api/v1/utilisateurs/register
- * @desc Créer un compte (inscription)
- * @access Public
- */
 utilisateurs.post('/register', (c) => utilisateurController.register(c));
 
 utilisateurs.post('/login', (c) => utilisateurController.login(c));

@@ -648,6 +648,99 @@ paths:
                   id: "VAG7e3Qj"
                   titre: "Quiz JavaScript Avancé"
 
+  /quizzes/partage/{lien}:
+    get:
+      tags: [Quiz]
+      summary: "✅ PUBLIC - Accéder à un quiz via lien de partage"
+      description: |
+        ## 🌐 Endpoint PUBLIC - Aucune authentification requise
+        
+        Permet d'accéder à un quiz en utilisant son lien de partage unique.
+        
+        **🔗 Utilisation du lien de partage :**
+        - Chaque quiz reçoit automatiquement un `lien_partage` unique à la création
+        - Ce lien peut être partagé publiquement (email, SMS, réseaux sociaux)
+        - N'importe qui peut accéder au quiz avec ce lien
+        - Le lien ne change jamais et reste valide
+        
+        **📋 Cas d'usage :**
+        1. Créateur crée un quiz → Reçoit `lien_partage: "905bf58c0e9cbfb0db0ddf5e48597774"`
+        2. Créateur partage ce lien avec son audience
+        3. Les participants accèdent au quiz via `GET /quizzes/partage/905bf58c0e9cbfb0db0ddf5e48597774`
+        4. Tous peuvent participer simultanément
+        
+        **🎯 Exemple frontend :**
+        ```javascript
+        // URL partageable
+        const shareUrl = `https://votreapp.com/quiz/${lien_partage}`;
+        
+        // Récupérer le quiz
+        const quiz = await fetch(`/api/v1/quizzes/partage/${lien_partage}`);
+        ```
+        
+        **💡 Différences avec `/quizzes/{id}` :**
+        - `/quizzes/partage/{lien}` : PUBLIC, utilise le lien de partage
+        - `/quizzes/{id}` : Peut nécessiter auth selon le statut du quiz
+      parameters:
+        - name: lien
+          in: path
+          required: true
+          description: Lien de partage unique du quiz (32 caractères hexadécimaux)
+          schema:
+            type: string
+            example: "905bf58c0e9cbfb0db0ddf5e48597774"
+            pattern: "^[a-f0-9]{32}$"
+      responses:
+        '200':
+          description: Quiz récupéré avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Quiz'
+              example:
+                success: true
+                data:
+                  id: "L93D03e0"
+                  titre: "Quiz la guerre mondiale"
+                  description: "Testez vos connaissances sur l'histoire"
+                  type_quiz: "instantane"
+                  statut: "publie"
+                  lien_partage: "905bf58c0e9cbfb0db0ddf5e48597774"
+                  nb_questions: 10
+                  duree_totale: 600
+                  createur:
+                    id: "2m3KMGnQ"
+                    prenom: "Jean"
+                    nom: "Dupont"
+                    email: "jean.dupont@example.com"
+                  questions:
+                    - id: "9x360G5g"
+                      texte: "En quelle année a débuté la Première Guerre mondiale ?"
+                      duree: 30
+                      ordre: 1
+                      choix_reponses:
+                        - id: "4JGR4Q36"
+                          texte: "1914"
+                          ordre: 1
+                        - id: "6bPLmwGO"
+                          texte: "1918"
+                          ordre: 2
+        '404':
+          description: Quiz non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                success: false
+                message: "Quiz non trouvé"
+
   /quizzes/{id}:
     get:
       tags: [Quiz]
