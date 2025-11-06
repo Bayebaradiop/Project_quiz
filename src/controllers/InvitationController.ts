@@ -14,8 +14,12 @@ const invitationService = new InvitationService();
 
 export class InvitationController {
   /**
-   * Crée une invitation pour un quiz
+   * Crée une ou plusieurs invitations pour un quiz
    * POST /api/v1/quizzes/:quizId/invitations
+   * 
+   * Formats acceptés:
+   * 1. Invitation unique: { "email": "user@example.com", "nom": "Nom", "prenom": "Prenom" }
+   * 2. Invitations multiples: { "emails": ["user1@example.com", "user2@example.com", ...] }
    */
   async create(c: Context) {
     try {
@@ -37,16 +41,40 @@ export class InvitationController {
         quiz_id: quizId,
       });
 
-      const invitation = await invitationService.createInvitation(validatedData, user.userId);
+      const result = await invitationService.createInvitation(validatedData, user.userId);
 
-      return c.json(
-        {
-          success: true,
-          message: SUCCESS_MESSAGES.INVITATION_CREATED,
-          data: invitation,
-        },
-        201
-      );
+      // CAS 1: Invitation unique
+      if ('email' in result && !('invitations' in result)) {
+        return c.json(
+          {
+            success: true,
+            message: SUCCESS_MESSAGES.INVITATION_CREATED,
+            data: result,
+          },
+          201
+        );
+      }
+
+      // CAS 2: Invitations multiples
+      if ('invitations' in result && 'summary' in result) {
+        const { invitations, summary } = result;
+        
+        return c.json(
+          {
+            success: summary.failed === 0,
+            message: summary.failed === 0
+              ? `${summary.success} invitation(s) créée(s) et envoyée(s) avec succès`
+              : `${summary.success} invitation(s) créée(s), ${summary.failed} échec(s)`,
+            data: {
+              invitations,
+              summary,
+            },
+          },
+          summary.failed === 0 ? 201 : 207 // 207 = Multi-Status (succès partiels)
+        );
+      }
+
+      return c.json({ success: false, message: 'Résultat inattendu' }, 500);
     } catch (error) {
       if (error instanceof ZodError) {
         return c.json(

@@ -4,6 +4,9 @@ export const INVITATION_VALIDATION_MESSAGES = {
   EMAIL_REQUIRED: 'L\'email est requis',
   EMAIL_INVALID: 'L\'email n\'est pas valide',
   EMAIL_MAX: 'L\'email ne peut pas dépasser 255 caractères',
+  EMAILS_REQUIRED: 'Au moins un email est requis',
+  EMAILS_INVALID: 'Tous les emails doivent être valides',
+  EMAIL_OR_EMAILS_REQUIRED: 'Vous devez fournir soit "email" soit "emails"',
   NOM_MAX: 'Le nom ne peut pas dépasser 100 caractères',
   PRENOM_MAX: 'Le prénom ne peut pas dépasser 100 caractères',
   DATE_EXPIRATION_INVALID: 'La date d\'expiration doit être dans le futur',
@@ -12,7 +15,8 @@ export const INVITATION_VALIDATION_MESSAGES = {
   CODE_ACCES_INVALID: 'Le code d\'accès n\'est pas valide',
 };
 
-export const createInvitationSchema = z.object({
+// Schéma pour invitation unique
+const singleInvitationSchema = z.object({
   quiz_id: z.number().int().positive(),
   email: z
     .string({ message: INVITATION_VALIDATION_MESSAGES.EMAIL_REQUIRED })
@@ -28,6 +32,29 @@ export const createInvitationSchema = z.object({
     )
     .optional(),
 });
+
+// Schéma pour invitations multiples
+const multipleInvitationsSchema = z.object({
+  quiz_id: z.number().int().positive(),
+  emails: z
+    .array(
+      z.string().email(INVITATION_VALIDATION_MESSAGES.EMAIL_INVALID).max(255, INVITATION_VALIDATION_MESSAGES.EMAIL_MAX)
+    )
+    .min(1, INVITATION_VALIDATION_MESSAGES.EMAILS_REQUIRED),
+  date_expiration: z
+    .date()
+    .refine(
+      (date) => date > new Date(),
+      INVITATION_VALIDATION_MESSAGES.DATE_EXPIRATION_INVALID
+    )
+    .optional(),
+});
+
+// Schéma unifié qui accepte les deux formats
+export const createInvitationSchema = z.union([
+  singleInvitationSchema,
+  multipleInvitationsSchema,
+]);
 
 export const updateInvitationSchema = z.object({
   email: z

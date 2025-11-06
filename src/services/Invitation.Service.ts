@@ -53,11 +53,14 @@ export class InvitationService {
   }
 
   /**
-   * Crée une invitation pour un quiz
-   * @param data - Données de l'invitation
+   * Crée une ou plusieurs invitations pour un quiz
+   * @param data - Données de l'invitation (email unique ou emails multiples)
    * @param userId - ID de l'utilisateur qui crée l'invitation
    */
-  async createInvitation(data: CreateInvitationInput, userId: number): Promise<Invitation> {
+  async createInvitation(
+    data: CreateInvitationInput | { quiz_id: number; emails: string[]; date_expiration?: Date },
+    userId: number
+  ): Promise<Invitation | { invitations: Invitation[]; summary: { total: number; success: number; failed: number; errors: any[] } }> {
     // Vérifier que le quiz existe
     const quiz = await quizRepository.findById(data.quiz_id);
     if (!quiz) {
@@ -69,29 +72,90 @@ export class InvitationService {
       throw new Error(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    // Générer un code d'accès unique
-    const code_acces = await this.generateUniqueCodeAcces();
+    // Récupérer les informations de l'utilisateur créateur
+    const utilisateur = await utilisateurRepository.findById(userId);
+    const invitedBy = utilisateur ? `${utilisateur.prenom} ${utilisateur.nom}` : 'Un utilisateur';
 
-    // Créer l'invitation
-    const invitation = await invitationRepository.create({
-      ...data,
-      code_acces,
-    });
+    // CAS 1: Invitation unique (email)
+    if ('email' in data && data.email) {
+      const code_acces = await this.generateUniqueCodeAcces();
 
-    // Envoyer l'email d'invitation
-    if (data.email) {
-      const utilisateur = await utilisateurRepository.findById(userId);
-      const invitedBy = utilisateur?.nom || 'Un utilisateur';
-      
-      await emailService.sendInvitationEmail(
-        data.email,
+      const invitation = await invitationRepository.create({
+        quiz_id: data.quiz_id,
+        email: data.email,
+        nom: 'nom' in data ? data.nom : null,
+        prenom: 'prenom' in data ? data.prenom : null,
+        date_expiration: data.date_expiration,
         code_acces,
-        quiz.titre,
-        invitedBy
-      );
+      });
+
+      // Envoyer l'email d'invitation
+      try {
+        await emailService.sendInvitationEmail(
+          data.email,
+          code_acces,
+          quiz.titre,
+          invitedBy
+        );
+      } catch (emailError) {
+        console.error(`Erreur lors de l'envoi de l'email à ${data.email}:`, emailError);
+      }
+
+      return invitation;
     }
 
-    return invitation;
+    // CAS 2: Invitations multiples (emails[])
+    if ('emails' in data && Array.isArray(data.emails)) {
+      const invitations: Invitation[] = [];
+      const errors: any[] = [];
+      let successCount = 0;
+
+      for (const email of data.emails) {
+        try {
+          const code_acces = await this.generateUniqueCodeAcces();
+
+          const invitation = await invitationRepository.create({
+            quiz_id: data.quiz_id,
+            email,
+            nom: null,
+            prenom: null,
+            date_expiration: data.date_expiration,
+            code_acces,
+          });
+
+          invitations.push(invitation);
+
+          // Envoyer l'email d'invitation (sans bloquer le processus)
+          emailService.sendInvitationEmail(
+            email,
+            code_acces,
+            quiz.titre,
+            invitedBy
+          ).catch((emailError) => {
+            console.error(`Erreur lors de l'envoi de l'email à ${email}:`, emailError);
+          });
+
+          successCount++;
+        } catch (error) {
+          errors.push({
+            email,
+            error: error instanceof Error ? error.message : 'Erreur inconnue',
+          });
+        }
+      }
+
+      return {
+        invitations,
+        summary: {
+          total: data.emails.length,
+          success: successCount,
+          failed: errors.length,
+          errors,
+        },
+      };
+    }
+
+    throw new Error('Données d\'invitation invalides');
   }
 
   /**
