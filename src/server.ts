@@ -18,10 +18,10 @@ const app = new Hono();
 app.use('*', logger());
 app.use('*', cors({
   origin: ENV.NODE_ENV === 'production'
-    ? ['https://votredomaine.com']
-    : ['http://localhost:3000', 'http://localhost:4200'],
+    ? ['https://senquiz.netlify.app', 'https://votredomaine.com']
+    : ['http://localhost:3000', 'http://localhost:4200', 'http://localhost:5173', 'https://senquiz.netlify.app'],
   credentials: true,
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
 }));
 
