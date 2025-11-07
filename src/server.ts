@@ -17,16 +17,13 @@ const app = new Hono();
 
 app.use('*', logger());
 
-// Configuration CORS adaptée au déploiement cross-site avec credentials
 const allowedOrigins = ENV.NODE_ENV === 'production'
   ? ['https://senquiz.netlify.app', 'https://votredomaine.com']
   : ['http://localhost:3000', 'http://localhost:4200', 'http://localhost:5173', 'https://senquiz.netlify.app'];
 
 app.use('*', cors({
   origin: (origin) => {
-    // Autoriser les requêtes sans Origin (comme Postman, curl, etc.)
     if (!origin) return allowedOrigins[0];
-    // Vérifier si l'origin est dans la liste autorisée et le renvoyer
     return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
   },
   credentials: true,
@@ -35,8 +32,6 @@ app.use('*', cors({
   exposeHeaders: ['Set-Cookie'],
 }));
 
-// 🔐 MIDDLEWARE AUTOMATIQUE: Encode TOUS les IDs dans TOUTES les réponses
-// Le frontend ne voit JAMAIS les IDs numériques - ZÉRO logique côté frontend
 app.use('/api/v1/*', autoEncodeIdsMiddleware);
 
 app.get('/', (c) => {
