@@ -40,10 +40,14 @@ export class UtilisateurController {
         password: validatedData.password,
       });
 
-      setCookie(c, JWT_CONFIG.accessTokenCookieName, result.token, {
+      // Build cookie options and remove `domain` when empty to avoid invalid cookie
+      const cookieOptsRegister: any = {
         ...JWT_CONFIG.cookieOptions,
         maxAge: JWT_CONFIG.accessTokenCookieMaxAge,
-      });
+      };
+      if (!cookieOptsRegister.domain) delete cookieOptsRegister.domain;
+
+      setCookie(c, JWT_CONFIG.accessTokenCookieName, result.token, cookieOptsRegister);
 
       return c.json({
         success: true,
@@ -78,10 +82,13 @@ export class UtilisateurController {
         validatedData.password
       );
 
-      setCookie(c, JWT_CONFIG.accessTokenCookieName, result.token, {
+      const cookieOptsLogin: any = {
         ...JWT_CONFIG.cookieOptions,
         maxAge: JWT_CONFIG.accessTokenCookieMaxAge,
-      });
+      };
+      if (!cookieOptsLogin.domain) delete cookieOptsLogin.domain;
+
+      setCookie(c, JWT_CONFIG.accessTokenCookieName, result.token, cookieOptsLogin);
 
       return c.json({
         success: true,
@@ -169,10 +176,13 @@ export class UtilisateurController {
 
   async logout(c: Context) {
     try {
-      deleteCookie(c, JWT_CONFIG.accessTokenCookieName, {
+      const cookieOptsLogout: any = {
         ...JWT_CONFIG.cookieOptions,
         path: '/',
-      });
+      };
+      if (!cookieOptsLogout.domain) delete cookieOptsLogout.domain;
+
+      deleteCookie(c, JWT_CONFIG.accessTokenCookieName, cookieOptsLogout);
 
       return c.json({
         success: true,
