@@ -17,17 +17,27 @@ const app = new Hono();
 
 app.use('*', logger());
 
-// CORS: Accepter toutes les origines
-// const allowedOrigins = ENV.NODE_ENV === 'production'
-//   ? ['https://quizzboard.jgohub.com','https://senquiz.netlify.app', 'http://195.35.48.54:8200','http://localhost:4200']
-//   : ['http://localhost:3000', 'http://localhost:4200', 'http://localhost:5173', 'https://senquiz.netlify.app'];
-
+// Configuration CORS optimale pour tous les environnements
 app.use('*', cors({
-  origin: '*', // Accepter toutes les origines
-  credentials: true,
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
-  exposeHeaders: ['Set-Cookie'],
+  origin: (origin) => {
+    // Toujours accepter les requêtes sans origine (ex: Postman, serveur à serveur)
+    if (!origin) return '*';
+    // Accepter toutes les origines dynamiquement
+    return origin;
+  },
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
+  allowHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'Access-Control-Request-Method',
+    'Access-Control-Request-Headers',
+  ],
+  exposeHeaders: ['Content-Length', 'Content-Type'],
+  maxAge: 86400, // 24 heures de cache pour les requêtes preflight
+  credentials: false, // Pas de cookies, on utilise Authorization Header
 }));
 
 app.use('/api/v1/*', autoEncodeIdsMiddleware);
