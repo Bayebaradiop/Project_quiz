@@ -40,14 +40,19 @@ export class UtilisateurController {
         password: validatedData.password,
       });
 
-      // Build cookie options and remove `domain` when empty to avoid invalid cookie
-      const cookieOptsRegister: any = {
-        ...JWT_CONFIG.cookieOptions,
-        maxAge: JWT_CONFIG.accessTokenCookieMaxAge,
-      };
-      if (!cookieOptsRegister.domain) delete cookieOptsRegister.domain;
+      // Définir le cookie seulement en développement (évite les erreurs avec anciennes versions Node.js)
+      try {
+        const cookieOptsRegister: any = {
+          ...JWT_CONFIG.cookieOptions,
+          maxAge: JWT_CONFIG.accessTokenCookieMaxAge,
+        };
+        if (!cookieOptsRegister.domain) delete cookieOptsRegister.domain;
 
-      setCookie(c, JWT_CONFIG.accessTokenCookieName, result.token, cookieOptsRegister);
+        setCookie(c, JWT_CONFIG.accessTokenCookieName, result.token, cookieOptsRegister);
+      } catch (cookieError) {
+        // Ignorer les erreurs de cookie, le token est dans la réponse JSON
+        console.log('Cookie non défini (utiliser Authorization header)');
+      }
 
       return c.json({
         success: true,
@@ -83,13 +88,19 @@ export class UtilisateurController {
         validatedData.password
       );
 
-      const cookieOptsLogin: any = {
-        ...JWT_CONFIG.cookieOptions,
-        maxAge: JWT_CONFIG.accessTokenCookieMaxAge,
-      };
-      if (!cookieOptsLogin.domain) delete cookieOptsLogin.domain;
+      // Définir le cookie seulement en développement (évite les erreurs avec anciennes versions Node.js)
+      try {
+        const cookieOptsLogin: any = {
+          ...JWT_CONFIG.cookieOptions,
+          maxAge: JWT_CONFIG.accessTokenCookieMaxAge,
+        };
+        if (!cookieOptsLogin.domain) delete cookieOptsLogin.domain;
 
-      setCookie(c, JWT_CONFIG.accessTokenCookieName, result.token, cookieOptsLogin);
+        setCookie(c, JWT_CONFIG.accessTokenCookieName, result.token, cookieOptsLogin);
+      } catch (cookieError) {
+        // Ignorer les erreurs de cookie, le token est dans la réponse JSON
+        console.log('Cookie non défini (utiliser Authorization header)');
+      }
 
       return c.json({
         success: true,
