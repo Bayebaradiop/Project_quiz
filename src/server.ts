@@ -73,7 +73,7 @@ app.onError((err, c) => {
   }, 500);
 });
 
-console.log(`🚀 Serveur: http://localhost:${ENV.PORT}`);
+console.log(` Serveur: http://localhost:${ENV.PORT}`);
 
 export default {
   port: ENV.PORT,
