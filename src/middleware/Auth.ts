@@ -9,8 +9,16 @@ import { JWT_CONFIG } from '../config/jwt.config';
  */
 export const authMiddleware = async (c: Context, next: Next) => {
   try {
-    // Récupérer le token depuis le cookie
-    const token = getCookie(c, JWT_CONFIG.accessTokenCookieName);
+    // Récupérer le token depuis le cookie OU le header Authorization
+    let token = getCookie(c, JWT_CONFIG.accessTokenCookieName);
+    
+    // Si pas de cookie, vérifier le header Authorization
+    if (!token) {
+      const authHeader = c.req.header('Authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
 
     if (!token) {
       return c.json({
@@ -51,8 +59,16 @@ export const getUserFromContext = (c: Context): JWTPayload => {
  */
 export const optionalAuthMiddleware = async (c: Context, next: Next) => {
   try {
-    // Récupérer le token depuis le cookie
-    const token = getCookie(c, JWT_CONFIG.accessTokenCookieName);
+    // Récupérer le token depuis le cookie OU le header Authorization
+    let token = getCookie(c, JWT_CONFIG.accessTokenCookieName);
+    
+    // Si pas de cookie, vérifier le header Authorization
+    if (!token) {
+      const authHeader = c.req.header('Authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
 
     if (token) {
       // Si token présent, le vérifier et l'ajouter au contexte

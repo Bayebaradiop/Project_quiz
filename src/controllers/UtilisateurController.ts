@@ -53,6 +53,7 @@ export class UtilisateurController {
         success: true,
         message: SUCCESS_MESSAGES.USER_CREATED,
         utilisateur: result.user,
+        token: result.token, // Token retourné dans la réponse
       }, 201);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -94,6 +95,7 @@ export class UtilisateurController {
         success: true,
         message: SUCCESS_MESSAGES.LOGIN_SUCCESS,
         utilisateur: result.user,
+        token: result.token, // Token retourné dans la réponse
       });
     } catch (error) {
       if (error instanceof ZodError) {
