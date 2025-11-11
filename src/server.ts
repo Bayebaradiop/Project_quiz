@@ -23,8 +23,12 @@ const allowedOrigins = ENV.NODE_ENV === 'production'
 
 app.use('*', cors({
   origin: (origin) => {
-    if (!origin) return allowedOrigins[0];
-    return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+    if (!origin) return '*';
+    if (allowedOrigins.includes(origin)) {
+      return origin;
+    }
+    console.log(` Origine non autorisée: ${origin}`);
+    return allowedOrigins[0];
   },
   credentials: true,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
