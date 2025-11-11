@@ -1,8 +1,8 @@
 import { Context } from 'hono';
-import { setCookie, deleteCookie } from 'hono/cookie';
+// import { setCookie, deleteCookie } from 'hono/cookie'; // HTTP-only cookies désactivés
 import { UtilisateurService } from '../services/Utilisateur.Service';
 import { registerSchema, loginSchema } from '../validations/Utilisateur.validator';
-import { JWT_CONFIG } from '../config/jwt.config';
+// import { JWT_CONFIG } from '../config/jwt.config'; // HTTP-only cookies désactivés
 import { ZodError } from 'zod';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../validations/erreurs_messages/Message.error';
 
@@ -40,19 +40,17 @@ export class UtilisateurController {
         password: validatedData.password,
       });
 
-      // Définir le cookie seulement en développement (évite les erreurs avec anciennes versions Node.js)
-      try {
-        const cookieOptsRegister: any = {
-          ...JWT_CONFIG.cookieOptions,
-          maxAge: JWT_CONFIG.accessTokenCookieMaxAge,
-        };
-        if (!cookieOptsRegister.domain) delete cookieOptsRegister.domain;
-
-        setCookie(c, JWT_CONFIG.accessTokenCookieName, result.token, cookieOptsRegister);
-      } catch (cookieError) {
-        // Ignorer les erreurs de cookie, le token est dans la réponse JSON
-        console.log('Cookie non défini (utiliser Authorization header)');
-      }
+      // HTTP-only cookies désactivés - Utilisation du token dans la réponse JSON uniquement
+      // try {
+      //   const cookieOptsRegister: any = {
+      //     ...JWT_CONFIG.cookieOptions,
+      //     maxAge: JWT_CONFIG.accessTokenCookieMaxAge,
+      //   };
+      //   if (!cookieOptsRegister.domain) delete cookieOptsRegister.domain;
+      //   setCookie(c, JWT_CONFIG.accessTokenCookieName, result.token, cookieOptsRegister);
+      // } catch (cookieError) {
+      //   console.log('Cookie non défini (utiliser Authorization header)');
+      // }
 
       return c.json({
         success: true,
@@ -88,19 +86,17 @@ export class UtilisateurController {
         validatedData.password
       );
 
-      // Définir le cookie seulement en développement (évite les erreurs avec anciennes versions Node.js)
-      try {
-        const cookieOptsLogin: any = {
-          ...JWT_CONFIG.cookieOptions,
-          maxAge: JWT_CONFIG.accessTokenCookieMaxAge,
-        };
-        if (!cookieOptsLogin.domain) delete cookieOptsLogin.domain;
-
-        setCookie(c, JWT_CONFIG.accessTokenCookieName, result.token, cookieOptsLogin);
-      } catch (cookieError) {
-        // Ignorer les erreurs de cookie, le token est dans la réponse JSON
-        console.log('Cookie non défini (utiliser Authorization header)');
-      }
+      // HTTP-only cookies désactivés - Utilisation du token dans la réponse JSON uniquement
+      // try {
+      //   const cookieOptsLogin: any = {
+      //     ...JWT_CONFIG.cookieOptions,
+      //     maxAge: JWT_CONFIG.accessTokenCookieMaxAge,
+      //   };
+      //   if (!cookieOptsLogin.domain) delete cookieOptsLogin.domain;
+      //   setCookie(c, JWT_CONFIG.accessTokenCookieName, result.token, cookieOptsLogin);
+      // } catch (cookieError) {
+      //   console.log('Cookie non défini (utiliser Authorization header)');
+      // }
 
       return c.json({
         success: true,
@@ -189,13 +185,13 @@ export class UtilisateurController {
 
   async logout(c: Context) {
     try {
-      const cookieOptsLogout: any = {
-        ...JWT_CONFIG.cookieOptions,
-        path: '/',
-      };
-      if (!cookieOptsLogout.domain) delete cookieOptsLogout.domain;
-
-      deleteCookie(c, JWT_CONFIG.accessTokenCookieName, cookieOptsLogout);
+      // HTTP-only cookies désactivés - Le logout se fait côté client en supprimant le token
+      // const cookieOptsLogout: any = {
+      //   ...JWT_CONFIG.cookieOptions,
+      //   path: '/',
+      // };
+      // if (!cookieOptsLogout.domain) delete cookieOptsLogout.domain;
+      // deleteCookie(c, JWT_CONFIG.accessTokenCookieName, cookieOptsLogout);
 
       return c.json({
         success: true,

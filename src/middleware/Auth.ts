@@ -1,23 +1,21 @@
 import { Context, Next } from 'hono';
-import { getCookie } from 'hono/cookie';
+// import { getCookie } from 'hono/cookie'; // HTTP-only cookies désactivés
 import { verifyAccessToken, JWTPayload } from '../utils/jwt.utils';
-import { JWT_CONFIG } from '../config/jwt.config';
+// import { JWT_CONFIG } from '../config/jwt.config'; // HTTP-only cookies désactivés
 
 /**
  * Middleware d'authentification JWT
- * Vérifie le token JWT dans le cookie HTTP-only
+ * Vérifie le token JWT dans le header Authorization uniquement
  */
 export const authMiddleware = async (c: Context, next: Next) => {
   try {
-    // Récupérer le token depuis le cookie OU le header Authorization
-    let token = getCookie(c, JWT_CONFIG.accessTokenCookieName);
+    // Récupérer le token depuis le header Authorization uniquement
+    // let token = getCookie(c, JWT_CONFIG.accessTokenCookieName); // HTTP-only cookies désactivés
+    let token: string | undefined;
     
-    // Si pas de cookie, vérifier le header Authorization
-    if (!token) {
-      const authHeader = c.req.header('Authorization');
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        token = authHeader.substring(7);
-      }
+    const authHeader = c.req.header('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
     }
 
     if (!token) {
@@ -59,15 +57,13 @@ export const getUserFromContext = (c: Context): JWTPayload => {
  */
 export const optionalAuthMiddleware = async (c: Context, next: Next) => {
   try {
-    // Récupérer le token depuis le cookie OU le header Authorization
-    let token = getCookie(c, JWT_CONFIG.accessTokenCookieName);
+    // Récupérer le token depuis le header Authorization uniquement
+    // let token = getCookie(c, JWT_CONFIG.accessTokenCookieName); // HTTP-only cookies désactivés
+    let token: string | undefined;
     
-    // Si pas de cookie, vérifier le header Authorization
-    if (!token) {
-      const authHeader = c.req.header('Authorization');
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        token = authHeader.substring(7);
-      }
+    const authHeader = c.req.header('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
     }
 
     if (token) {
