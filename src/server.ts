@@ -17,19 +17,13 @@ const app = new Hono();
 
 app.use('*', logger());
 
-const allowedOrigins = ENV.NODE_ENV === 'production'
-  ? ['https://quizzboard.jgohub.com','https://senquiz.netlify.app', 'http://195.35.48.54:8200','http://localhost:4200']
-  : ['http://localhost:3000', 'http://localhost:4200', 'http://localhost:5173', 'http://senquiz.netlify.app'];
+// CORS: Accepter toutes les origines
+// const allowedOrigins = ENV.NODE_ENV === 'production'
+//   ? ['https://quizzboard.jgohub.com','https://senquiz.netlify.app', 'http://195.35.48.54:8200','http://localhost:4200']
+//   : ['http://localhost:3000', 'http://localhost:4200', 'http://localhost:5173', 'https://senquiz.netlify.app'];
 
 app.use('*', cors({
-  origin: (origin) => {
-    if (!origin) return '*';
-    if (allowedOrigins.includes(origin)) {
-      return origin;
-    }
-    console.log(` Origine non autorisée: ${origin}`);
-    return allowedOrigins[0];
-  },
+  origin: '*', // Accepter toutes les origines
   credentials: true,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
