@@ -18,8 +18,8 @@ const app = new Hono();
 app.use('*', logger());
 
 const allowedOrigins = ENV.NODE_ENV === 'production'
-  ? ['https://senquiz.netlify.app', 'https://195.35.48.54:8200','https://localhost:4200','https://quizzboard.jgohub.com']
-  : ['https://localhost:3000', 'https://localhost:4200', 'https://localhost:5173', 'https://senquiz.netlify.app'];
+  ? ['https://senquiz.netlify.app', 'http://195.35.48.54:8200','http://localhost:4200','https://quizzboard.jgohub.com']
+  : ['http://localhost:3000', 'http://localhost:4200', 'http://localhost:5173', 'http://senquiz.netlify.app'];
 
 app.use('*', cors({
   origin: (origin) => {
