@@ -1,31 +1,32 @@
 import axios from 'axios';
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 export async function generateQuizQuestions(prompt: string): Promise<string> {
-  if (!GROQ_API_KEY) {
+  if (!OPENAI_API_KEY) {
     throw new Error(
-      'Clé API Groq manquante. Ajoutez GROQ_API_KEY dans votre fichier .env\n' +
-      'Inscription gratuite : https://console.groq.com'
+      'Service de génération temporairement indisponible. Veuillez réessayer plus tard.'
     );
   }
 
   try {
-    console.log('[QuizAI] � Génération avec Groq...');
-    return await generateWithGroq(prompt);
+    console.log('[QuizAI]  Génération avec OpenAI...');
+    return await generateWithOpenAI(prompt);
   } catch (error: any) {
-    console.error('[QuizAI]  Erreur Groq:', error.response?.data?.error?.message || error.message);
+    console.error('[QuizAI]  Erreur OpenAI:', error.response?.data?.error?.message || error.message);
+    
+    // Message générique pour le client
     throw new Error(
-      `Échec de la génération de questions : ${error.response?.data?.error?.message || error.message}`
+      'Un problème temporaire empêche la génération de questions'
     );
   }
 }
 
 /**
- * Génération via Groq API (RECOMMANDÉ)
- * Utilise Llama 3.3 70B - Rapide, gratuit, puissant
+ * Génération via OpenAI API
+ * Utilise GPT-3.5-turbo
  */
-async function generateWithGroq(prompt: string): Promise<string> {
+async function generateWithOpenAI(prompt: string): Promise<string> {
   const systemPrompt = `Tu es un assistant pédagogique expert. Tu génères des questions de quiz pédagogiques de haute qualité.
 
 Format de réponse OBLIGATOIRE (JSON strict):
@@ -46,9 +47,9 @@ Règles importantes:
 - Respecter strictement le format JSON`;
 
   const response = await axios.post(
-    'https://api.groq.com/openai/v1/chat/completions',
+    'https://api.openai.com/v1/chat/completions',
     {
-      model: 'llama-3.3-70b-versatile',
+      model: 'gpt-3.5-turbo',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: prompt }
@@ -59,14 +60,14 @@ Règles importantes:
     },
     {
       headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json'
       },
       timeout: 30000
     }
   );
   
-  console.log('[QuizAI]  Réponse Groq reçue');
+  console.log('[QuizAI] ✅ Réponse OpenAI reçue');
   return response.data.choices[0].message.content;
 }
 
