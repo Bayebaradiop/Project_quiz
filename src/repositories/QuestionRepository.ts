@@ -83,9 +83,8 @@ export class QuestionRepository {
   }
 
   async delete(id: number): Promise<Question> {
-    return await prisma.question.update({
+    return await prisma.question.delete({
       where: { id },
-      data: { deletedAt: new Date() },
     }) as Question;
   }
 
