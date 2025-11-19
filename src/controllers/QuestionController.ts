@@ -157,16 +157,9 @@ export class QuestionController {
 
   update = async (c: Context) => {
     try {
-      const id = parseInt(c.req.param('id'));
+      const id = getNumericId(c, 'id');
       const body = await c.req.json();
       const utilisateur = getUserFromContext(c);
-
-      if (isNaN(id)) {
-        return c.json({
-          success: false,
-          message: 'ID invalide',
-        }, 400);
-      }
 
       const validatedData = updateQuestionSchema.parse(body);
 
@@ -212,15 +205,8 @@ export class QuestionController {
 
   delete = async (c: Context) => {
     try {
-      const id = parseInt(c.req.param('id'));
+      const id = getNumericId(c, 'id');
       const utilisateur = getUserFromContext(c);
-
-      if (isNaN(id)) {
-        return c.json({
-          success: false,
-          message: 'ID invalide',
-        }, 400);
-      }
 
       await this.questionService.deleteQuestion(id, utilisateur.userId);
 
