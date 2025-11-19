@@ -6,9 +6,6 @@ import { autoEncodeIdsMiddleware } from './middleware/HashId';
 import utilisateursRoutes from './routes/utilisateurs.routes';
 import quizzesRoutes from './routes/quizzes.routes';
 import questionsRoutes from './routes/questions.routes';
-import reponsesRoutes from './routes/reponses.routes';
-import { invitationRoutes } from './routes/invitations.routes';
-import { participationRoutes } from './routes/participations.routes';
 import { createSwaggerRoutes } from './config/swagger.config';
 
 validateEnv();
@@ -61,9 +58,7 @@ createSwaggerRoutes(app);
 app.route('/api/v1/utilisateurs', utilisateursRoutes);
 app.route('/api/v1/quizzes', quizzesRoutes);
 app.route('/api/v1', questionsRoutes);
-app.route('/api/v1', reponsesRoutes);
-app.route('/api/v1/invitations', invitationRoutes);
-app.route('/api/v1/participations', participationRoutes);
+
 
 app.notFound((c) => {
   return c.json({
