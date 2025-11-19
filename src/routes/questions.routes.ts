@@ -14,7 +14,7 @@ questionsRoutes.get('/questions/:questionId/reponses/next-ordre', authMiddleware
 questionsRoutes.get('/questions/:questionId/reponses', reponseController.getAllByQuestionId);
 
 questionsRoutes.get('/questions/:id', questionController.getById);
-questionsRoutes.put('/questions/:id', authMiddleware, questionController.update);
-questionsRoutes.delete('/questions/:id', authMiddleware, questionController.delete);
+questionsRoutes.put('/questions/:id', questionController.update);
+questionsRoutes.delete('/questions/:id', questionController.delete);
 
 export default questionsRoutes;
